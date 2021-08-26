@@ -16,3 +16,15 @@ class NaiveRLDataset(Dataset):
 
     def __getitem__(self, idx: int) -> Dict[str, torch.Tensor]:
         return self._data[idx]
+
+class OfflineRLDataset(Dataset):
+
+    def __init__(self, data_path: str) -> None:
+        self._data_path = data_path
+        self._data = torch.load(self._data_path)
+
+    def __len__(self) -> int:
+        return len(self._data)
+
+    def __getitem__(self, idx: int) -> Dict[str, torch.Tensor]:
+        return self._data[idx]
