@@ -23,7 +23,7 @@ from .atoc import ATOCPolicy
 from .acer import ACERPolicy
 from .qtran import QTRANPolicy
 from .sql import SQLPolicy
-
+from .cql import CQLPolicy
 
 class EpsCommandModePolicy(CommandModePolicy):
 
@@ -180,4 +180,9 @@ class ACERCommandModePolisy(ACERPolicy, DummyCommandModePolicy):
 
 @POLICY_REGISTRY.register('qtran_command')
 class QTRANCommandModePolicy(QTRANPolicy, EpsCommandModePolicy):
+    pass
+
+
+@POLICY_REGISTRY.register('cql_command')
+class CQLCommandModePolicy(CQLPolicy, DummyCommandModePolicy):
     pass

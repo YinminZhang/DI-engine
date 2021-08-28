@@ -77,6 +77,7 @@ def serial_pipeline_data_generation(
     # Main loop
     # ==========
     # Learner's before_run hook.
+    # import ipdb;ipdb.set_trace()
     learner.call_hook('before_run')
 
     collect_kwargs = commander.step()
@@ -86,8 +87,10 @@ def serial_pipeline_data_generation(
 
     # Save replay buffer data
 
-    save_data(replay_buffer, cfg.policy.learn.hook.save_path)
-
+    save_data(replay_buffer, cfg.policy.learn.save_path)
+    # state_dict = torch.load(cfg.policy.learn.hook.load_ckpt_before_run, map_location='cpu')
+    # policy.load_state_dict(state_dict)
+    stop, reward = evaluator.eval(train_iter= learner.train_iter, envstep= collector.envstep)
     # Learner's after_run hook.
     # learner.call_hook('after_run')
 

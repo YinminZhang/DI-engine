@@ -57,8 +57,8 @@ hopper_cql_default_create_config = dict(
     ),
     env_manager=dict(type='base'),
     policy=dict(
-        type='sac',
-        import_names=['ding.policy.sac'],
+        type='cql',
+        import_names=['ding.policy.cql'],
     ),
     replay_buffer=dict(type='naive', ),
 )

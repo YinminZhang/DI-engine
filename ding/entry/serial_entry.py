@@ -18,7 +18,7 @@ def serial_pipeline(
         seed: int = 0,
         env_setting: Optional[List[Any]] = None,
         model: Optional[torch.nn.Module] = None,
-        max_iterations: Optional[int] = int(1e10),
+        max_iterations: Optional[int] = int(3e6),
 ) -> 'Policy':  # noqa
     """
     Overview:

@@ -478,7 +478,8 @@ class CQLPolicy(Policy):
     def _load_state_dict_learn(self, state_dict: Dict[str, Any]) -> None:
         self._learn_model.load_state_dict(state_dict['model'])
         self._optimizer_q.load_state_dict(state_dict['optimizer_q'])
-        self._optimizer_value.load_state_dict(state_dict['optimizer_value'])
+        if self._value_network:
+            self._optimizer_value.load_state_dict(state_dict['optimizer_value'])
         self._optimizer_policy.load_state_dict(state_dict['optimizer_policy'])
         if self._auto_alpha:
             self._alpha_optim.load_state_dict(state_dict['optimizer_alpha'])
