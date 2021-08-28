@@ -13,7 +13,7 @@ from ding.policy import create_policy, PolicyFactory
 from ding.utils import set_pkg_seed
 
 from torch.utils.data import DataLoader
-from ding.utils.data import OfflineRLDataset
+from ding.utils.data import OfflineRLDataset, D4RLDataset
 
 
 def serial_pipeline_offline(
@@ -56,7 +56,10 @@ def serial_pipeline_offline(
 
     # Main components
     tb_logger = SummaryWriter(os.path.join('./{}/log/'.format(cfg.exp_name), 'serial'))
-    dataset = OfflineRLDataset(cfg.policy.learn.data_path)
+    if cfg.policy.learn.data_type=='d4rl':
+        dataset = D4RLDataset(cfg.env.env_id, policy._device)
+    else:
+        dataset = OfflineRLDataset(cfg.policy.learn.data_path)
     dataloader = DataLoader(dataset, cfg.policy.learn.batch_size, collate_fn=lambda x: x)
     learner = BaseLearner(cfg.policy.learn.learner, policy.learn_mode, tb_logger, exp_name=cfg.exp_name)
     evaluator = BaseSerialEvaluator(

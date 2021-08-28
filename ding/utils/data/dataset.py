@@ -28,3 +28,39 @@ class OfflineRLDataset(Dataset):
 
     def __getitem__(self, idx: int) -> Dict[str, torch.Tensor]:
         return self._data[idx]
+
+
+class D4RLDataset(Dataset):
+    
+    def __init__(self, env_id: str, device: str) -> None:
+        import gym
+        import d4rl # Import required to register environments
+        # Create the environment
+        self._device = device
+        env = gym.make(env_id)
+        if 'random-expert' in env_id:
+            dataset = d4rl.basic_dataset(env)
+        else:
+            dataset = d4rl.qlearning_dataset(env)
+        self._data = []
+        self._load_d4rl(dataset)
+
+    def __len__(self) -> int:
+        return len(self._data)
+
+    def __getitem__(self, idx: int) -> Dict[str, torch.Tensor]:
+        return self._data[idx]
+
+    def _load_d4rl(self, dataset):
+        for i in range(len(dataset['observations'])):
+            # if i >1000:
+            #     break
+            trans_data={}
+            # import ipdb;ipdb.set_trace()
+            trans_data['obs'] = torch.from_numpy(dataset['observations'][i]).to(self._device)
+            trans_data['next_obs'] = torch.from_numpy(dataset['next_observations'][i]).to(self._device)
+            trans_data['action'] = torch.from_numpy(dataset['actions'][i]).to(self._device)
+            trans_data['reward'] = torch.tensor(dataset['rewards'][i]).to(self._device)
+            trans_data['done'] = dataset['terminals'][i]
+            trans_data['collect_iter'] = 0
+            self._data.append(trans_data)
