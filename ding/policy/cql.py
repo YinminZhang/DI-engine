@@ -196,15 +196,15 @@ class CQLPolicy(Policy):
         self._num_actions = self._cfg.learn.num_actions
         self.min_q_version = 3
         self.temp = 1.
-        self.min_q_weight = 1.
+        self.min_q_weight = self._cfg.learn.min_q_weight
         self.with_lagrange = True
-        self.lagrange_thresh = 10.0
+        self.lagrange_thresh = self._cfg.learn.lagrange_thresh
         if self.with_lagrange:
             self.target_action_gap = self.lagrange_thresh
             self.log_alpha_prime = torch.tensor(0.).to(self._device).requires_grad_()
             self.alpha_prime_optimizer = Adam(
                 [self.log_alpha_prime],
-                lr=3e-4,
+                lr=self._cfg.learn.learning_rate_q,
             )
 
 
