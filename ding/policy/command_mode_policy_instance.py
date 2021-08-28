@@ -187,7 +187,3 @@ class ACERCommandModePolisy(ACERPolicy, DummyCommandModePolicy):
 class QTRANCommandModePolicy(QTRANPolicy, EpsCommandModePolicy):
     pass
 
-
-@POLICY_REGISTRY.register('cql_command')
-class CQLCommandModePolicy(CQLPolicy, DummyCommandModePolicy):
-    pass

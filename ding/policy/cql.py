@@ -197,7 +197,16 @@ class CQLPolicy(Policy):
         self.min_q_version = 3
         self.temp = 1.
         self.min_q_weight = 1.
-        self.with_lagrange = False
+        self.with_lagrange = True
+        self.lagrange_thresh = 10.0
+        if self.with_lagrange:
+            self.target_action_gap = self.lagrange_thresh
+            self.log_alpha_prime = torch.tensor(0.).to(self._device).requires_grad_()
+            self.alpha_prime_optimizer = Adam(
+                [self.log_alpha_prime],
+                lr=3e-4,
+            )
+
 
         # Weight Init
         init_w = self._cfg.learn.init_w
@@ -378,14 +387,14 @@ class CQLPolicy(Policy):
         min_qf2_loss = min_qf2_loss - q_pred[1].mean() * self.min_q_weight
         
         if self.with_lagrange:
-            alpha_prime = torch.clamp(self._log_alpha.exp(), min=0.0, max=1000000.0)
+            alpha_prime = torch.clamp(self.log_alpha_prime.exp(), min=0.0, max=1000000.0)
             min_qf1_loss = alpha_prime * (min_qf1_loss - self.target_action_gap)
             min_qf2_loss = alpha_prime * (min_qf2_loss - self.target_action_gap)
 
-            self._alpha_optim.zero_grad()
+            self.alpha_prime_optimizer.zero_grad()
             alpha_prime_loss = (-min_qf1_loss - min_qf2_loss)*0.5 
             alpha_prime_loss.backward(retain_graph=True)
-            self._alpha_optim.step()
+            self.alpha_prime_optimizer.step()
 
         loss_dict['critic_loss'] += min_qf1_loss
         loss_dict['twin_critic_loss'] += min_qf2_loss
