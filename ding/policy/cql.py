@@ -154,6 +154,8 @@ class CQLPolicy(Policy):
             ignore_done=False,
             # (float) Weight uniform initialization range in the last output layer
             init_w=3e-3,
+            
+            num_actions=10,
         ),
         collect=dict(
             # You can use either "n_sample" or "n_episode" in actor.collect.
@@ -191,6 +193,11 @@ class CQLPolicy(Policy):
         self._priority_IS_weight = self._cfg.priority_IS_weight
         self._value_network = False  # TODO self._cfg.model.value_network
         self._twin_critic = self._cfg.model.twin_critic
+        self._num_actions = self._cfg.learn.num_actions
+        self.min_q_version = 3
+        self.temp = 1.
+        self.min_q_weight = 1.
+        self.with_lagrange = False
 
         # Weight Init
         init_w = self._cfg.learn.init_w
@@ -252,6 +259,7 @@ class CQLPolicy(Policy):
         self._target_model.reset()
 
         self._forward_learn_cnt = 0
+        
 
     def _forward_learn(self, data: dict) -> Dict[str, Any]:
         r"""
@@ -328,11 +336,11 @@ class CQLPolicy(Policy):
 
         # add CQL
         
-        curr_actions_tensor, curr_log_pis = self._get_policy_actions(data)
-        new_curr_actions_tensor, new_log_pis = self._get_policy_actions({'obs': next_obs})
+        curr_actions_tensor, curr_log_pis = self._get_policy_actions(data, self._num_actions)
+        new_curr_actions_tensor, new_log_pis = self._get_policy_actions({'obs': next_obs}, self._num_actions)
         
         # random_actions_tensor = torch.FloatTensor(q2_pred.shape[0] * self.num_random, actions.shape[-1]).uniform_(-1, 1) # .cuda()
-        random_actions_tensor = torch.random(curr_actions_tensor.shape).to(curr_actions_tensor.device)
+        random_actions_tensor = torch.FloatTensor(curr_actions_tensor.shape).uniform_(-1, 1).to(curr_actions_tensor.device)
         
         q_pred = self._get_q_value({'obs': obs, 'action': data['action']})
         q_rand = self._get_q_value({'obs': obs, 'action': random_actions_tensor})
@@ -341,22 +349,24 @@ class CQLPolicy(Policy):
         # q2_curr_actions = self._get_tensor_values(obs, curr_actions_tensor, network=self.qf2)
         q_next_actions = self._get_q_value({'obs': obs, 'action': new_curr_actions_tensor})
         # q2_next_actions = self._get_tensor_values(obs, new_curr_actions_tensor, network=self.qf2)
-        cat_q1 = torch.cat(
-            [q_rand[0], q_pred.unsqueeze(1)[0], q_next_actions[0], q_curr_actions[0]], 1
+        
+        cat_q1 = torch.stack(
+            [q_rand[0], q_pred[0], q_next_actions[0], q_curr_actions[0]], 1
         )
-        cat_q2 = torch.cat(
-            [q_rand[1], q_pred.unsqueeze(1)[1], q_next_actions[1], q_curr_actions[1]], 1
+        cat_q2 = torch.stack(
+            [q_rand[1], q_pred[1], q_next_actions[1], q_curr_actions[1]], 1
         )
         std_q1 = torch.std(cat_q1, dim=1)
         std_q2 = torch.std(cat_q2, dim=1)
-        
         if self.min_q_version == 3:
             # importance sammpled version
             random_density = np.log(0.5 ** curr_actions_tensor.shape[-1])
-            cat_q1 = torch.cat(
+            # import ipdb
+            # ipdb.set_trace()
+            cat_q1 = torch.stack(
                 [q_rand[0] - random_density, q_next_actions[0] - new_log_pis.detach(), q_curr_actions[0] - curr_log_pis.detach()], 1
             )
-            cat_q2 = torch.cat(
+            cat_q2 = torch.stack(
                 [q_rand[1] - random_density, q_next_actions[1] - new_log_pis.detach(), q_curr_actions[1] - curr_log_pis.detach()], 1
             )
             
@@ -383,7 +393,7 @@ class CQLPolicy(Policy):
         
         # update q network
         self._optimizer_q.zero_grad()
-        loss_dict['critic_loss'].backward()
+        loss_dict['critic_loss'].backward(retain_graph=True)
         if self._twin_critic:
             loss_dict['twin_critic_loss'].backward()
         self._optimizer_q.step()
@@ -478,7 +488,8 @@ class CQLPolicy(Policy):
     def _load_state_dict_learn(self, state_dict: Dict[str, Any]) -> None:
         self._learn_model.load_state_dict(state_dict['model'])
         self._optimizer_q.load_state_dict(state_dict['optimizer_q'])
-        self._optimizer_value.load_state_dict(state_dict['optimizer_value'])
+        if self._value_network:
+            self._optimizer_value.load_state_dict(state_dict['optimizer_value'])
         self._optimizer_policy.load_state_dict(state_dict['optimizer_policy'])
         if self._auto_alpha:
             self._alpha_optim.load_state_dict(state_dict['optimizer_alpha'])
@@ -607,9 +618,11 @@ class CQLPolicy(Policy):
                 'alpha', 'td_error', 'target_value'
             ] + twin_critic
 
-    def _get_policy_actions(self, data: Dict, epsilon: float=1e-6) -> List:
+    def _get_policy_actions(self, data: Dict, num_actions=10, epsilon: float=1e-6) -> List:
         
         # evaluate to get action distribution
+        obs = data['obs']
+        obs = obs.unsqueeze(1).repeat(1, num_actions, 1).view(obs.shape[0] * num_actions, obs.shape[1])
         (mu, sigma) = self._learn_model.forward(data['obs'], mode='compute_actor')['logit']
         dist = Independent(Normal(mu, sigma), 1)
         pred = dist.rsample()
@@ -620,9 +633,9 @@ class CQLPolicy(Policy):
         log_prob = dist.log_prob(pred).unsqueeze(-1)
         log_prob = log_prob - torch.log(y).sum(-1, keepdim=True)
         
-        return action, log_prob
+        return action, log_prob.squeeze(-1)
     
-    def _get_q_value(self, data: Dict, keep=False) -> Tensor:
+    def _get_q_value(self, data: Dict, keep=True) -> Tensor:
         new_q_value = self._learn_model.forward(data, mode='compute_critic')['q_value']
         if self._twin_critic and not keep:
             new_q_value = torch.min(new_q_value[0], new_q_value[1])

@@ -1,3 +1,4 @@
+from ding.policy.cql import CQLPolicy
 from ding.utils import POLICY_REGISTRY
 from ding.rl_utils import get_epsilon_greedy_fn
 from .base_policy import CommandModePolicy
@@ -150,6 +151,10 @@ class TD3CommandModePolicy(TD3Policy, DummyCommandModePolicy):
 
 @POLICY_REGISTRY.register('sac_command')
 class SACCommandModePolicy(SACPolicy, DummyCommandModePolicy):
+    pass
+
+@POLICY_REGISTRY.register('cql_command')
+class SACCommandModePolicy(CQLPolicy, DummyCommandModePolicy):
     pass
 
 
