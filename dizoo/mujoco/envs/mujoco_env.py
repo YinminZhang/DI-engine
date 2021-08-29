@@ -282,6 +282,33 @@ MUJOCO_INFO_DICT = {
         ),
         use_wrappers=None,
     ),
+    'hopper-expert-v0': BaseEnvInfo(
+        agent_num=1,
+        obs_space=EnvElementInfo(
+            shape=(11, ),
+            value={
+                'min': np.float64("-inf"),
+                'max': np.float64("inf"),
+                'dtype': np.float32
+            },
+        ),
+        act_space=EnvElementInfo(
+            shape=(3, ),
+            value={
+                'min': -1.0,
+                'max': 1.0,
+                'dtype': np.float32
+            },
+        ),
+        rew_space=EnvElementInfo(
+            shape=1,
+            value={
+                'min': np.float64("-inf"),
+                'max': np.float64("inf")
+            },
+        ),
+        use_wrappers=None,
+    ),
 }
 
 

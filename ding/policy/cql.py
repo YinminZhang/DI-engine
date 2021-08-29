@@ -194,6 +194,9 @@ class CQLPolicy(Policy):
         self._value_network = False  # TODO self._cfg.model.value_network
         self._twin_critic = self._cfg.model.twin_critic
         self._num_actions = self._cfg.learn.num_actions
+
+        self._data_type = self._cfg.learn.data_type
+        self._data_path = self._cfg.learn.data_path
         self.min_q_version = 3
         self.temp = 1.
         self.min_q_weight = self._cfg.learn.min_q_weight
