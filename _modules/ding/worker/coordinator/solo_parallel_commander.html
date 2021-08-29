@@ -24,8 +24,6 @@
         <script src="../../../../_static/jquery.js"></script>
         <script src="../../../../_static/underscore.js"></script>
         <script src="../../../../_static/doctools.js"></script>
-        <script src="../../../../_static/language_data.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
 
@@ -161,9 +159,9 @@
            <div itemprop="articleBody">
             
   <h1>Source code for ding.worker.coordinator.solo_parallel_commander</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">time</span>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span>
+<span class="kn">import</span> <span class="nn">time</span>
 <span class="kn">import</span> <span class="nn">copy</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">from</span> <span class="nn">ding.policy</span> <span class="kn">import</span> <span class="n">create_policy</span>
 <span class="kn">from</span> <span class="nn">ding.utils</span> <span class="kn">import</span> <span class="n">LimitedSpaceContainer</span><span class="p">,</span> <span class="n">get_task_uid</span><span class="p">,</span> <span class="n">build_logger</span><span class="p">,</span> <span class="n">COMMANDER_REGISTRY</span>
@@ -193,6 +191,7 @@
 <span class="sd">            - cfg (:obj:`dict`): Dict type config file.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_cfg</span> <span class="o">=</span> <span class="n">cfg</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_exp_name</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">exp_name</span>
         <span class="n">commander_cfg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cfg</span><span class="o">.</span><span class="n">policy</span><span class="o">.</span><span class="n">other</span><span class="o">.</span><span class="n">commander</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_commander_cfg</span> <span class="o">=</span> <span class="n">commander_cfg</span>
 
@@ -218,9 +217,15 @@
         <span class="c1"># policy_cfg must be deepcopyed</span>
         <span class="n">policy_cfg</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cfg</span><span class="o">.</span><span class="n">policy</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_policy</span> <span class="o">=</span> <span class="n">create_policy</span><span class="p">(</span><span class="n">policy_cfg</span><span class="p">,</span> <span class="n">enable_field</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;command&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">command_mode</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tb_logger</span> <span class="o">=</span> <span class="n">build_logger</span><span class="p">(</span><span class="s2">&quot;./log/commander&quot;</span><span class="p">,</span> <span class="s2">&quot;commander&quot;</span><span class="p">,</span> <span class="n">need_tb</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_collector_logger</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">build_logger</span><span class="p">(</span><span class="s2">&quot;./log/commander&quot;</span><span class="p">,</span> <span class="s2">&quot;commander_collector&quot;</span><span class="p">,</span> <span class="n">need_tb</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_evaluator_logger</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">build_logger</span><span class="p">(</span><span class="s2">&quot;./log/commander&quot;</span><span class="p">,</span> <span class="s2">&quot;commander_evaluator&quot;</span><span class="p">,</span> <span class="n">need_tb</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tb_logger</span> <span class="o">=</span> <span class="n">build_logger</span><span class="p">(</span>
+            <span class="s2">&quot;./</span><span class="si">{}</span><span class="s2">/log/commander&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_exp_name</span><span class="p">),</span> <span class="s2">&quot;commander&quot;</span><span class="p">,</span> <span class="n">need_tb</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_collector_logger</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">build_logger</span><span class="p">(</span>
+            <span class="s2">&quot;./</span><span class="si">{}</span><span class="s2">/log/commander&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_exp_name</span><span class="p">),</span> <span class="s2">&quot;commander_collector&quot;</span><span class="p">,</span> <span class="n">need_tb</span><span class="o">=</span><span class="kc">False</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_evaluator_logger</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">build_logger</span><span class="p">(</span>
+            <span class="s2">&quot;./</span><span class="si">{}</span><span class="s2">/log/commander&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_exp_name</span><span class="p">),</span> <span class="s2">&quot;commander_evaluator&quot;</span><span class="p">,</span> <span class="n">need_tb</span><span class="o">=</span><span class="kc">False</span>
+        <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_sub_logger</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s1">&#39;collector&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collector_logger</span><span class="p">,</span>
             <span class="s1">&#39;evaluator&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_evaluator_logger</span><span class="p">,</span>
@@ -254,6 +259,7 @@
             <span class="n">collector_cfg</span><span class="o">.</span><span class="n">policy_update_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_policy_id</span>
             <span class="n">collector_cfg</span><span class="o">.</span><span class="n">eval_flag</span> <span class="o">=</span> <span class="n">eval_flag</span>
             <span class="n">collector_cfg</span><span class="o">.</span><span class="n">policy</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cfg</span><span class="o">.</span><span class="n">policy</span><span class="p">)</span>
+            <span class="n">collector_cfg</span><span class="o">.</span><span class="n">exp_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exp_name</span>
             <span class="k">if</span> <span class="n">eval_flag</span><span class="p">:</span>
                 <span class="n">collector_cfg</span><span class="o">.</span><span class="n">env</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_evaluator_env_cfg</span>
             <span class="k">else</span><span class="p">:</span>
@@ -277,6 +283,7 @@
             <span class="k">return</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_learner_task_space</span><span class="o">.</span><span class="n">acquire_space</span><span class="p">():</span>
             <span class="n">learner_cfg</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cfg</span><span class="o">.</span><span class="n">policy</span><span class="o">.</span><span class="n">learn</span><span class="o">.</span><span class="n">learner</span><span class="p">)</span>
+            <span class="n">learner_cfg</span><span class="o">.</span><span class="n">exp_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exp_name</span>
             <span class="k">return</span> <span class="p">{</span>
                 <span class="s1">&#39;task_id&#39;</span><span class="p">:</span> <span class="s1">&#39;learner_task_</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">get_task_uid</span><span class="p">()),</span>
                 <span class="s1">&#39;policy_id&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_init_policy_id</span><span class="p">(),</span>

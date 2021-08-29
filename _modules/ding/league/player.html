@@ -24,8 +24,6 @@
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/doctools.js"></script>
-        <script src="../../../_static/language_data.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="../../../_static/js/theme.js"></script>
 
@@ -161,12 +159,12 @@
            <div itemprop="articleBody">
             
   <h1>Source code for ding.league.player</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Any</span>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">List</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">namedtuple</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">easydict</span> <span class="kn">import</span> <span class="n">EasyDict</span>
 
-<span class="kn">from</span> <span class="nn">ding.utils</span> <span class="kn">import</span> <span class="n">deep_merge_dicts</span><span class="p">,</span> <span class="n">import_module</span><span class="p">,</span> <span class="n">PLAYER_REGISTRY</span>
+<span class="kn">from</span> <span class="nn">ding.utils</span> <span class="kn">import</span> <span class="n">import_module</span><span class="p">,</span> <span class="n">PLAYER_REGISTRY</span>
 <span class="kn">from</span> <span class="nn">.algorithm</span> <span class="kn">import</span> <span class="n">pfsp</span>
 
 
@@ -348,7 +346,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">category</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">payoff</span><span class="p">,</span>
             <span class="n">path</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">player_id</span> <span class="o">+</span> <span class="s1">&#39;_</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_total_agent_step</span><span class="p">)),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">player_id</span> <span class="o">+</span> <span class="s1">&#39;_</span><span class="si">{}</span><span class="s1">_historical&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_total_agent_step</span><span class="p">)),</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_total_agent_step</span><span class="p">,</span>
             <span class="n">parent_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">player_id</span>
         <span class="p">)</span>

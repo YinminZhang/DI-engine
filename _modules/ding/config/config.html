@@ -24,8 +24,6 @@
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/doctools.js"></script>
-        <script src="../../../_static/language_data.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="../../../_static/js/theme.js"></script>
 
@@ -161,10 +159,12 @@
            <div itemprop="articleBody">
             
   <h1>Source code for ding.config.config</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">json</span>
+<span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">os.path</span> <span class="k">as</span> <span class="nn">osp</span>
+<span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">import</span> <span class="nn">shutil</span>
 <span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">time</span>
 <span class="kn">import</span> <span class="nn">tempfile</span>
 <span class="kn">from</span> <span class="nn">importlib</span> <span class="kn">import</span> <span class="n">import_module</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">NoReturn</span>
@@ -174,7 +174,7 @@
 <span class="kn">from</span> <span class="nn">ding.utils</span> <span class="kn">import</span> <span class="n">deep_merge_dicts</span>
 <span class="kn">from</span> <span class="nn">ding.envs</span> <span class="kn">import</span> <span class="n">get_env_cls</span><span class="p">,</span> <span class="n">get_env_manager_cls</span>
 <span class="kn">from</span> <span class="nn">ding.policy</span> <span class="kn">import</span> <span class="n">get_policy_cls</span>
-<span class="kn">from</span> <span class="nn">ding.worker</span> <span class="kn">import</span> <span class="n">BaseLearner</span><span class="p">,</span> <span class="n">BaseSerialEvaluator</span><span class="p">,</span> <span class="n">BaseSerialCommander</span><span class="p">,</span> <span class="n">Coordinator</span><span class="p">,</span> \
+<span class="kn">from</span> <span class="nn">ding.worker</span> <span class="kn">import</span> <span class="n">BaseLearner</span><span class="p">,</span> <span class="n">BaseSerialEvaluator</span><span class="p">,</span> <span class="n">BaseSerialCommander</span><span class="p">,</span> <span class="n">Coordinator</span><span class="p">,</span> <span class="n">AdvancedReplayBuffer</span><span class="p">,</span> \
     <span class="n">get_parallel_commander_cls</span><span class="p">,</span> <span class="n">get_parallel_collector_cls</span><span class="p">,</span> <span class="n">get_buffer_cls</span><span class="p">,</span> <span class="n">get_serial_collector_cls</span>
 <span class="kn">from</span> <span class="nn">ding.reward_model</span> <span class="kn">import</span> <span class="n">get_reward_model_cls</span>
 <span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">parallel_transform</span><span class="p">,</span> <span class="n">parallel_transform_slurm</span><span class="p">,</span> <span class="n">parallel_transform_k8s</span><span class="p">,</span> <span class="n">save_config_formatted</span>
@@ -250,6 +250,7 @@
         <span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">()</span> <span class="k">as</span> <span class="n">temp_config_dir</span><span class="p">:</span>
             <span class="n">temp_config_file</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="nb">dir</span><span class="o">=</span><span class="n">temp_config_dir</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="n">ext_name</span><span class="p">)</span>
             <span class="n">temp_config_name</span> <span class="o">=</span> <span class="n">osp</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">temp_config_file</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">temp_config_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
             <span class="n">shutil</span><span class="o">.</span><span class="n">copyfile</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">temp_config_file</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
             <span class="n">temp_module_name</span> <span class="o">=</span> <span class="n">osp</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">temp_config_name</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
@@ -259,7 +260,6 @@
             <span class="n">cfg_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">module</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">k</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)}</span>
             <span class="k">del</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="n">temp_module_name</span><span class="p">]</span>
             <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-            <span class="n">temp_config_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
         <span class="n">cfg_text</span> <span class="o">=</span> <span class="n">filename</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
@@ -314,33 +314,64 @@
     <span class="n">config_string</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">FormatCode</span><span class="p">(</span><span class="n">config_string</span><span class="p">)</span>
     <span class="n">config_string</span> <span class="o">=</span> <span class="n">config_string</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">,</span> <span class="s1">&#39;float(&quot;inf&quot;)&#39;</span><span class="p">)</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;exp_config=&#39;</span> <span class="o">+</span> <span class="n">config_string</span><span class="p">)</span></div>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;exp_config = &#39;</span> <span class="o">+</span> <span class="n">config_string</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="read_config"><a class="viewcode-back" href="../../../api_doc/config/config.html#ding.config.read_config">[docs]</a><span class="k">def</span> <span class="nf">read_config</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">direct</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">dict</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
+<span class="k">def</span> <span class="nf">read_config_directly</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Overview:</span>
-<span class="sd">        read configuration from python file</span>
+<span class="sd">        Read configuration from a file path(now only suport python file) and directly return results.</span>
 <span class="sd">    Arguments:</span>
-<span class="sd">        - cfg (:obj:`str`): Path of python file</span>
-<span class="sd">        - direct (:obj:`bool`): Read config directly if direct is true or divide config into main_config,\</span>
-<span class="sd">            create_config and system_config if direct is false</span>
+<span class="sd">        - path (:obj:`str`): Path of configuration file</span>
 <span class="sd">    Returns:</span>
-<span class="sd">        - cfg (:obj:`Tuple[dict, dict]`): Config dict, such as [main_config, create_config, system_config]\</span>
-<span class="sd">            or main_config, create_config, system_config</span>
+<span class="sd">        - cfg (:obj:`Tuple[dict, dict]`): Configuration dict.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">suffix</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">suffix</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
     <span class="k">if</span> <span class="n">suffix</span> <span class="o">==</span> <span class="s1">&#39;py&#39;</span><span class="p">:</span>
-        <span class="n">cfg</span> <span class="o">=</span> <span class="n">Config</span><span class="o">.</span><span class="n">file_to_dict</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span><span class="o">.</span><span class="n">cfg_dict</span>
-        <span class="k">if</span> <span class="n">direct</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">cfg</span>
+        <span class="k">return</span> <span class="n">Config</span><span class="o">.</span><span class="n">file_to_dict</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">cfg_dict</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;invalid config file suffix: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">suffix</span><span class="p">))</span>
+
+
+<div class="viewcode-block" id="read_config"><a class="viewcode-back" href="../../../api_doc/config/config.html#ding.config.read_config">[docs]</a><span class="k">def</span> <span class="nf">read_config</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">dict</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Overview:</span>
+<span class="sd">        Read configuration from a file path(now only suport python file). And select some proper parts.</span>
+<span class="sd">    Arguments:</span>
+<span class="sd">        - path (:obj:`str`): Path of configuration file</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        - cfg (:obj:`Tuple[dict, dict]`): A collection(tuple) of configuration dict, divided into `main_config` and \</span>
+<span class="sd">            `create_cfg` two parts.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">suffix</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">suffix</span> <span class="o">==</span> <span class="s1">&#39;py&#39;</span><span class="p">:</span>
+        <span class="n">cfg</span> <span class="o">=</span> <span class="n">Config</span><span class="o">.</span><span class="n">file_to_dict</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">cfg_dict</span>
         <span class="k">assert</span> <span class="s2">&quot;main_config&quot;</span> <span class="ow">in</span> <span class="n">cfg</span><span class="p">,</span> <span class="s2">&quot;Please make sure a &#39;main_config&#39; variable is declared in config python file!&quot;</span>
-        <span class="k">if</span> <span class="s1">&#39;system_config&#39;</span> <span class="ow">in</span> <span class="n">cfg</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;main_config&#39;</span><span class="p">],</span> <span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;create_config&#39;</span><span class="p">],</span> <span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;system_config&#39;</span><span class="p">]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;main_config&#39;</span><span class="p">],</span> <span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;create_config&#39;</span><span class="p">]</span>
+        <span class="k">assert</span> <span class="s2">&quot;create_config&quot;</span> <span class="ow">in</span> <span class="n">cfg</span><span class="p">,</span> <span class="s2">&quot;Please make sure a &#39;create_config&#39; variable is declared in config python file!&quot;</span>
+        <span class="k">return</span> <span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;main_config&#39;</span><span class="p">],</span> <span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;create_config&#39;</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;invalid config file suffix: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">suffix</span><span class="p">))</span></div>
+
+
+<span class="k">def</span> <span class="nf">read_config_with_system</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">dict</span><span class="p">,</span> <span class="nb">dict</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Overview:</span>
+<span class="sd">        Read configuration from a file path(now only suport python file). And select some proper parts</span>
+<span class="sd">    Arguments:</span>
+<span class="sd">        - path (:obj:`str`): Path of configuration file</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        - cfg (:obj:`Tuple[dict, dict]`): A collection(tuple) of configuration dict, divided into `main_config`, \</span>
+<span class="sd">            `create_cfg` and `system_config` three parts.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">suffix</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">suffix</span> <span class="o">==</span> <span class="s1">&#39;py&#39;</span><span class="p">:</span>
+        <span class="n">cfg</span> <span class="o">=</span> <span class="n">Config</span><span class="o">.</span><span class="n">file_to_dict</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">cfg_dict</span>
+        <span class="k">assert</span> <span class="s2">&quot;main_config&quot;</span> <span class="ow">in</span> <span class="n">cfg</span><span class="p">,</span> <span class="s2">&quot;Please make sure a &#39;main_config&#39; variable is declared in config python file!&quot;</span>
+        <span class="k">assert</span> <span class="s2">&quot;create_config&quot;</span> <span class="ow">in</span> <span class="n">cfg</span><span class="p">,</span> <span class="s2">&quot;Please make sure a &#39;create_config&#39; variable is declared in config python file!&quot;</span>
+        <span class="k">assert</span> <span class="s2">&quot;system_config&quot;</span> <span class="ow">in</span> <span class="n">cfg</span><span class="p">,</span> <span class="s2">&quot;Please make sure a &#39;system_config&#39; variable is declared in config python file!&quot;</span>
+        <span class="k">return</span> <span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;main_config&#39;</span><span class="p">],</span> <span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;create_config&#39;</span><span class="p">],</span> <span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;system_config&#39;</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;invalid config file suffix: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">suffix</span><span class="p">))</span>
 
 
 <div class="viewcode-block" id="save_config"><a class="viewcode-back" href="../../../api_doc/config/config.html#ding.config.save_config">[docs]</a><span class="k">def</span> <span class="nf">save_config</span><span class="p">(</span><span class="n">config_</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">type_</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;py&#39;</span><span class="p">,</span> <span class="n">save_formatted</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NoReturn</span><span class="p">:</span>
@@ -439,7 +470,7 @@
         <span class="n">learner</span><span class="p">:</span> <span class="nb">type</span> <span class="o">=</span> <span class="n">BaseLearner</span><span class="p">,</span>
         <span class="n">collector</span><span class="p">:</span> <span class="nb">type</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">evaluator</span><span class="p">:</span> <span class="nb">type</span> <span class="o">=</span> <span class="n">BaseSerialEvaluator</span><span class="p">,</span>
-        <span class="n">buffer</span><span class="p">:</span> <span class="nb">type</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">buffer</span><span class="p">:</span> <span class="nb">type</span> <span class="o">=</span> <span class="n">AdvancedReplayBuffer</span><span class="p">,</span>
         <span class="n">env</span><span class="p">:</span> <span class="nb">type</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">reward_model</span><span class="p">:</span> <span class="nb">type</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
@@ -535,7 +566,12 @@
     <span class="k">assert</span> <span class="nb">all</span><span class="p">([</span><span class="n">k</span> <span class="ow">in</span> <span class="n">cfg</span><span class="o">.</span><span class="n">env</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;n_evaluator_episode&#39;</span><span class="p">,</span> <span class="s1">&#39;stop_value&#39;</span><span class="p">]]),</span> <span class="n">cfg</span><span class="o">.</span><span class="n">env</span>
     <span class="n">cfg</span><span class="o">.</span><span class="n">policy</span><span class="o">.</span><span class="n">eval</span><span class="o">.</span><span class="n">evaluator</span><span class="o">.</span><span class="n">stop_value</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">stop_value</span>
     <span class="n">cfg</span><span class="o">.</span><span class="n">policy</span><span class="o">.</span><span class="n">eval</span><span class="o">.</span><span class="n">evaluator</span><span class="o">.</span><span class="n">n_episode</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">n_evaluator_episode</span>
+    <span class="k">if</span> <span class="s1">&#39;exp_name&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cfg</span><span class="p">:</span>
+        <span class="n">cfg</span><span class="o">.</span><span class="n">exp_name</span> <span class="o">=</span> <span class="s1">&#39;default_experiment&#39;</span>
     <span class="k">if</span> <span class="n">save_cfg</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">exp_name</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">exp_name</span><span class="p">)</span>
+        <span class="n">save_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">exp_name</span><span class="p">,</span> <span class="n">save_path</span><span class="p">)</span>
         <span class="n">save_config</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">save_path</span><span class="p">,</span> <span class="n">save_formatted</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">cfg</span></div>
 
