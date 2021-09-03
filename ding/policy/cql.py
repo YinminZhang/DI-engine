@@ -198,6 +198,7 @@ class CQLPolicy(Policy):
         self._data_type = self._cfg.learn.data_type
         self._data_path = self._cfg.learn.data_path
         self.min_q_version = 3
+        self._cat_q_type = self._cfg.learn.cat_q_type
         self.temp = 1.
         self.min_q_weight = self._cfg.learn.min_q_weight
         self.with_lagrange = True
@@ -373,14 +374,43 @@ class CQLPolicy(Policy):
         if self.min_q_version == 3:
             # importance sammpled version
             random_density = np.log(0.5 ** curr_actions_tensor.shape[-1])
-            # import ipdb
-            # ipdb.set_trace()
-            cat_q1 = torch.stack(
-                [q_rand[0] - random_density, q_next_actions[0] - new_log_pis.detach(), q_curr_actions[0] - curr_log_pis.detach()], 1
-            )
-            cat_q2 = torch.stack(
-                [q_rand[1] - random_density, q_next_actions[1] - new_log_pis.detach(), q_curr_actions[1] - curr_log_pis.detach()], 1
-            )
+            if self._cat_q_type==0:
+                cat_q1 = torch.stack(
+                    [q_rand[0] - random_density, q_next_actions[0] - new_log_pis.detach()], 1
+                )
+                cat_q2 = torch.stack(
+                    [q_rand[1] - random_density, q_next_actions[1] - new_log_pis.detach()], 1
+                )
+            elif self._cat_q_type==1:
+                cat_q1 = torch.stack(
+                    [q_rand[0] - random_density, q_curr_actions[0] - curr_log_pis.detach()], 1
+                )
+                cat_q2 = torch.stack(
+                    [q_rand[1] - random_density, q_curr_actions[1] - curr_log_pis.detach()], 1
+                )
+            elif self._cat_q_type==2:
+                cat_q1 = torch.stack(
+                    [q_next_actions[0] - new_log_pis.detach(), q_curr_actions[0] - curr_log_pis.detach()], 1
+                )
+                cat_q2 = torch.stack(
+                    [q_next_actions[1] - new_log_pis.detach(), q_curr_actions[1] - curr_log_pis.detach()], 1
+                )
+            elif self._cat_q_type==3:
+                cat_q1 = torch.stack([q_rand[0] - random_density], 1)
+                cat_q2 = torch.stack([q_rand[1] - random_density], 1)
+            elif self._cat_q_type==4:
+                cat_q1 = torch.stack([q_next_actions[0] - new_log_pis.detach()], 1)
+                cat_q2 = torch.stack([q_next_actions[1] - new_log_pis.detach()], 1)
+            elif self._cat_q_type==5:
+                cat_q1 = torch.stack([q_curr_actions[0] - curr_log_pis.detach()], 1)
+                cat_q2 = torch.stack([q_curr_actions[1] - curr_log_pis.detach()], 1)
+            else:
+                cat_q1 = torch.stack(
+                    [q_rand[0] - random_density, q_next_actions[0] - new_log_pis.detach(), q_curr_actions[0] - curr_log_pis.detach()], 1
+                )
+                cat_q2 = torch.stack(
+                    [q_rand[1] - random_density, q_next_actions[1] - new_log_pis.detach(), q_curr_actions[1] - curr_log_pis.detach()], 1
+                )
             
         min_qf1_loss = torch.logsumexp(cat_q1 / self.temp, dim=1,).mean() * self.min_q_weight * self.temp
         min_qf2_loss = torch.logsumexp(cat_q2 / self.temp, dim=1,).mean() * self.min_q_weight * self.temp

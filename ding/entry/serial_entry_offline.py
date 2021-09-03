@@ -60,6 +60,7 @@ def serial_pipeline_offline(
         dataset = D4RLDataset(cfg.env.env_id, policy._device)
     else:
         dataset = OfflineRLDataset(cfg.policy.learn.data_path)
+    # import ipdb;ipdb.set_trace()
     dataloader = DataLoader(dataset, cfg.policy.learn.batch_size, collate_fn=lambda x: x)
     learner = BaseLearner(cfg.policy.learn.learner, policy.learn_mode, tb_logger, exp_name=cfg.exp_name)
     evaluator = BaseSerialEvaluator(
