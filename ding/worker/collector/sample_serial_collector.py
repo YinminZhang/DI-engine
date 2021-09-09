@@ -8,7 +8,7 @@ from ding.envs import BaseEnvManager
 from ding.utils import build_logger, EasyTimer, SERIAL_COLLECTOR_REGISTRY, one_time_warning
 from ding.torch_utils import to_tensor, to_ndarray
 from .base_serial_collector import ISerialCollector, CachePool, TrajBuffer, INF, to_tensor_transitions
-
+import ding.worker.collector.crash_on_ipy
 
 @SERIAL_COLLECTOR_REGISTRY.register('sample')
 class SampleCollector(ISerialCollector):
@@ -219,8 +219,8 @@ class SampleCollector(ISerialCollector):
         return_data = []
 
         while collected_sample < n_sample:
-            if collected_sample%10000==0:
-                self._logger.info("[COLLECT] collected_sample {}/{}".format(collected_sample, n_sample))
+            # if collected_sample%10000==0:
+            #     self._logger.info("[COLLECT] collected_sample {}/{}".format(collected_sample, n_sample))
             with self._timer:
                 # Get current env obs.
                 obs = self._env.ready_obs

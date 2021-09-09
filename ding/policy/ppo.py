@@ -274,11 +274,15 @@ class PPOPolicy(Policy):
             data = to_device(data, self._device)
         self._collect_model.eval()
         with torch.no_grad():
+            # import ipdb;ipdb.set_trace()
             output = self._collect_model.forward(data, mode='compute_actor_critic')
             if self._continuous:
                 (mu, sigma), value = output['logit'], output['value']
-                dist = Independent(Normal(mu, sigma), 1)
-                output['action'] = dist.sample()
+                dist = Independent(Normal(mu, sigma*self._cfg.learn.sigma_ratio), 1)
+                if self._cfg.collect.collect_tanh:
+                    output['action'] = torch.tanh(dist.sample())
+                else:
+                    output['action'] = dist.sample()
         if self._cuda:
             output = to_device(output, 'cpu')
         output = default_decollate(output)
@@ -372,9 +376,9 @@ class PPOPolicy(Policy):
             data = to_device(data, self._device)
         self._eval_model.eval()
         with torch.no_grad():
-            output = self._eval_model.forward(data, mode='compute_actor')
+            output = self._eval_model.forward(data, mode='compute_actor_critic')
             if self._continuous:
-                (mu, sigma) = output['logit']
+                (mu, sigma), value = output['logit'], output['value']
                 output.update({'action': mu})
         if self._cuda:
             output = to_device(output, 'cpu')

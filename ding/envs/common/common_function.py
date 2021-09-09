@@ -242,7 +242,8 @@ def affine_transform(
         alpha: Optional[float] = None,
         beta: Optional[float] = None,
         min_val: Optional[float] = None,
-        max_val: Optional[float] = None
+        max_val: Optional[float] = None,
+        use_tanh: Optional[bool] = False
 ) -> Any:
     """
     Overview:
@@ -257,7 +258,10 @@ def affine_transform(
     Returns:
         - transformed_data (:obj:`Any`): affine transformed data
     """
-    data = np.clip(data, -1, 1)
+    if use_tanh:
+        data = np.tanh(data)
+    else:
+        data = np.clip(data, -1, 1)
     if min_val is not None:
         assert max_val is not None
         alpha = (max_val - min_val) / 2

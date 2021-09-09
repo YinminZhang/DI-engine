@@ -465,7 +465,7 @@ class SACPolicy(Policy):
         self._collect_model.eval()
         with torch.no_grad():
             (mu, sigma) = self._collect_model.forward(data, mode='compute_actor')['logit']
-            dist = Independent(Normal(mu, sigma), 1)
+            dist = Independent(Normal(mu, sigma*self._cfg.learn.sigma_ratio), 1)
             action = torch.tanh(dist.rsample())
             output = {'logit': (mu, sigma), 'action': action}
         if self._cuda:

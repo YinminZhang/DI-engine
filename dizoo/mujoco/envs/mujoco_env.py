@@ -348,7 +348,7 @@ class MujocoEnv(BaseEnv):
         action = to_ndarray(action)
         if self._use_act_scale:
             action_range = self.info().act_space.value
-            action = affine_transform(action, min_val=action_range['min'], max_val=action_range['max'])
+            action = affine_transform(action, min_val=action_range['min'], max_val=action_range['max'], use_tanh=self._cfg.use_tanh)
         obs, rew, done, info = self._env.step(action)
         self._final_eval_reward += rew
         obs = to_ndarray(obs).astype('float32')
