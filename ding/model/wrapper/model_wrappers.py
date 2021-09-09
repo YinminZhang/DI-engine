@@ -309,9 +309,11 @@ class ActionNoiseWrapper(IModelWrapper):
             action_range: Optional[dict] = {
                 'min': -1,
                 'max': 1
-            }
+            },
+            use_tanh: Optional[bool] = False
     ) -> None:
         super().__init__(model)
+        self.use_tanh = use_tanh
         self.noise_generator = create_noise_generator(noise_type, noise_kwargs)
         self.noise_range = noise_range
         self.action_range = action_range
@@ -322,11 +324,11 @@ class ActionNoiseWrapper(IModelWrapper):
         if 'action' in output:
             action = output['action']
             assert isinstance(action, torch.Tensor)
-            action = self.add_noise(action)
+            action = self.add_noise(action,self.use_tanh)
             output['action'] = action
         return output
 
-    def add_noise(self, action: torch.Tensor) -> torch.Tensor:
+    def add_noise(self, action: torch.Tensor, use_tanh: Optional[bool] = False) -> torch.Tensor:
         r"""
         Overview:
             Generate noise and clip noise if needed. Add noise to action and clip action if needed.
@@ -340,7 +342,10 @@ class ActionNoiseWrapper(IModelWrapper):
             noise = noise.clamp(self.noise_range['min'], self.noise_range['max'])
         action += noise
         if self.action_range is not None:
-            action = action.clamp(self.action_range['min'], self.action_range['max'])
+            if use_tanh:
+                action = self.action_range['min'] + (self.action_range['max']-self.action_range['min'])*(torch.tanh(action)+1)/2
+            else:
+                action = action.clamp(self.action_range['min'], self.action_range['max'])
         return action
 
     def reset(self) -> None:

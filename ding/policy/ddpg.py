@@ -173,12 +173,13 @@ class DDPGPolicy(Policy):
             self._target_model = model_wrap(
                 self._target_model,
                 wrapper_name='action_noise',
-                noise_type='gauss',
+                # noise_type='gauss',
                 noise_kwargs={
                     'mu': 0.0,
                     'sigma': self._cfg.learn.noise_sigma
                 },
-                noise_range=self._cfg.learn.noise_range
+                noise_range=self._cfg.learn.noise_range,
+                use_tanh = self._cfg.learn.use_tanh
             )
         self._learn_model = model_wrap(self._model, wrapper_name='base')
         self._learn_model.reset()
@@ -308,12 +309,13 @@ class DDPGPolicy(Policy):
         self._collect_model = model_wrap(
             self._model,
             wrapper_name='action_noise',
-            noise_type='gauss',
+            # noise_type='gauss',
             noise_kwargs={
                 'mu': 0.0,
                 'sigma': self._cfg.collect.noise_sigma
             },
-            noise_range=None
+            noise_range=None,
+            use_tanh = self._cfg.learn.use_tanh
         )
         self._collect_model.reset()
 
@@ -333,6 +335,17 @@ class DDPGPolicy(Policy):
         self._collect_model.eval()
         with torch.no_grad():
             output = self._collect_model.forward(data, mode='compute_actor')
+            # from torch.distributions import Independent, Normal
+            # mu = output['action']
+            # sigma=torch.zeros_like(mu,device=mu.device)
+            # sigma[:,0]=0.3533
+            # sigma[:,1]=0.4880
+            # sigma[:,2]=0.4405
+            # dist = Independent(Normal(mu, sigma), 1)
+            # if self._cfg.collect.collect_tanh:
+            #     output['action'] = torch.tanh(dist.sample())
+            # else:
+            #     output['action'] = dist.sample()
         if self._cuda:
             output = to_device(output, 'cpu')
         output = default_decollate(output)

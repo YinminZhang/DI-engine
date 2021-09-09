@@ -9,7 +9,7 @@ hopper_ppo_default_config = dict(
         evaluator_env_num=10,
         use_act_scale=True,
         n_evaluator_episode=10,
-        stop_value=3000,
+        stop_value=6000,
     ),
     policy=dict(
         cuda=True,

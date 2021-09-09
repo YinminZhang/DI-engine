@@ -59,10 +59,21 @@ def serial_pipeline_data_generation(
     # Create worker components: learner, collector, evaluator, replay buffer, commander.
     tb_logger = SummaryWriter(os.path.join('./{}/log/'.format(cfg.exp_name), 'serial'))
     learner = BaseLearner(cfg.policy.learn.learner, policy.learn_mode, tb_logger, exp_name=cfg.exp_name)
+    collect_demo_policy = policy.collect_mode
+    # collect_demo_policy = policy.collect_function(
+    #     policy._forward_eval,
+    #     policy._process_transition,
+    #     policy._get_train_sample,
+    #     policy._reset_eval,
+    #     policy._get_attribute,
+    #     policy._set_attribute,
+    #     policy._state_dict_eval,
+    #     policy._load_state_dict_eval,
+    # )
     collector = create_serial_collector(
         cfg.policy.collect.collector,
         env=collector_env,
-        policy=policy.collect_mode,
+        policy=collect_demo_policy,
         tb_logger=tb_logger,
         exp_name=cfg.exp_name
     )
@@ -81,7 +92,6 @@ def serial_pipeline_data_generation(
     learner.call_hook('before_run')
 
     collect_kwargs = commander.step()
-
     new_data = collector.collect(n_sample=cfg.policy.other.replay_buffer.replay_buffer_size, policy_kwargs=collect_kwargs)
     replay_buffer.push(new_data, cur_collector_envstep=0)
 

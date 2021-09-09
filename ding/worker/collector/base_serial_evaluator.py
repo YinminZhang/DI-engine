@@ -249,7 +249,7 @@ class BaseSerialEvaluator(object):
         eval_reward = np.mean(episode_reward)
         if eval_reward > self._max_eval_reward:
             if save_ckpt_fn:
-                save_ckpt_fn('ckpt_best.pth.tar')
+                save_ckpt_fn('ckpt_best_'+str(train_iter)+'.pth.tar')
             self._max_eval_reward = eval_reward
         stop_flag = eval_reward >= self._stop_value and train_iter > 0
         if stop_flag:
