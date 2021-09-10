@@ -173,7 +173,7 @@ class DDPGPolicy(Policy):
             self._target_model = model_wrap(
                 self._target_model,
                 wrapper_name='action_noise',
-                # noise_type='gauss',
+                noise_type='gauss',
                 noise_kwargs={
                     'mu': 0.0,
                     'sigma': self._cfg.learn.noise_sigma
@@ -309,7 +309,7 @@ class DDPGPolicy(Policy):
         self._collect_model = model_wrap(
             self._model,
             wrapper_name='action_noise',
-            # noise_type='gauss',
+            noise_type='gauss',
             noise_kwargs={
                 'mu': 0.0,
                 'sigma': self._cfg.collect.noise_sigma

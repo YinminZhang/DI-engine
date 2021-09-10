@@ -25,6 +25,7 @@ from .acer import ACERPolicy
 from .qtran import QTRANPolicy
 from .sql import SQLPolicy
 from .cql import CQLPolicy
+from .ddpg_cql import DDPGCQLPolicy
 
 class EpsCommandModePolicy(CommandModePolicy):
 
@@ -143,6 +144,9 @@ class PPGCommandModePolicy(PPGPolicy, DummyCommandModePolicy):
 class DDPGCommandModePolicy(DDPGPolicy, DummyCommandModePolicy):
     pass
 
+@POLICY_REGISTRY.register('ddpg_cql_command')
+class DDPGCQLCommandModePolicy(DDPGCQLPolicy, DummyCommandModePolicy):
+    pass
 
 @POLICY_REGISTRY.register('td3_command')
 class TD3CommandModePolicy(TD3Policy, DummyCommandModePolicy):

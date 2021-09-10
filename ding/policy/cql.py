@@ -318,19 +318,23 @@ class CQLPolicy(Policy):
                 dist = Independent(Normal(mu, sigma), 1)
                 pred = dist.rsample()
                 next_action = torch.tanh(pred)
-                y = 1 - next_action.pow(2) + 1e-6
+                y = 1 - next_action.pow(2) + 1e-6               
                 next_log_prob = dist.log_prob(pred).unsqueeze(-1)
                 next_log_prob = next_log_prob - torch.log(y).sum(-1, keepdim=True)
-
                 next_data = {'obs': next_obs, 'action': next_action}
                 target_q_value = self._target_model.forward(next_data, mode='compute_critic')['q_value']
                 # the value of a policy according to the maximum entropy objective
                 if self._twin_critic:
                     # find min one as target q value
-                    target_q_value = torch.min(target_q_value[0],
+                    if self._cfg.learn.q_entory:
+                        target_q_value = torch.min(target_q_value[0],
                                                target_q_value[1]) - self._alpha * next_log_prob.squeeze(-1)
+                    else:
+                        target_q_value = torch.min(target_q_value[0],  target_q_value[1]) 
                 else:
-                    target_q_value = target_q_value - self._alpha * next_log_prob.squeeze(-1)
+                    if self._cfg.learn.q_entory:
+                        target_q_value = target_q_value - self._alpha * next_log_prob.squeeze(-1)
+
         target_value = next_v_value if self._value_network else target_q_value
 
         # =================
@@ -466,7 +470,10 @@ class CQLPolicy(Policy):
         # compute value loss
         if self._value_network:
             # new_q_value: (bs, ), log_prob: (bs, act_shape) -> target_v_value: (bs, )
-            target_v_value = (new_q_value.unsqueeze(-1) - self._alpha * log_prob).mean(dim=-1)
+            if self._cfg.learn.q_entory:
+                target_v_value = (new_q_value.unsqueeze(-1) - self._alpha * log_prob).mean(dim=-1)
+            else:
+                target_v_value = new_q_value.unsqueeze(-1).mean(dim=-1)
             loss_dict['value_loss'] = F.mse_loss(v_value, target_v_value.detach())
 
             # update value network
