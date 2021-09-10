@@ -352,7 +352,6 @@ class CQLPolicy(Policy):
             loss_dict['critic_loss'], td_error_per_sample = v_1step_td_error(q_data, self._gamma)
 
         # add CQL
-        
         curr_actions_tensor, curr_log_pis = self._get_policy_actions(data, self._num_actions)
         new_curr_actions_tensor, new_log_pis = self._get_policy_actions({'obs': next_obs}, self._num_actions)
         
@@ -364,7 +363,8 @@ class CQLPolicy(Policy):
         act_repeat = data['action'].unsqueeze(1).repeat(1, self._num_actions, 1).view(data['action'].shape[0] *
                                                                                       self._num_actions,
                                                                                       data['action'].shape[1])
-        q_pred = self._get_q_value({'obs': obs_repeat, 'action': act_repeat})
+        # q_pred = self._get_q_value({'obs': obs_repeat, 'action': act_repeat})
+        # q_pred = self._get_q_value({'obs': obs, 'action': data['action']})
         q_rand = self._get_q_value({'obs': obs_repeat, 'action': random_actions_tensor})
         # q2_rand = self._get_q_value(obs, random_actions_tensor, network=self.qf2)
         q_curr_actions = self._get_q_value({'obs': obs_repeat, 'action': curr_actions_tensor})
@@ -372,11 +372,11 @@ class CQLPolicy(Policy):
         q_next_actions = self._get_q_value({'obs': obs_repeat, 'action': new_curr_actions_tensor})
         # q2_next_actions = self._get_tensor_values(obs, new_curr_actions_tensor, network=self.qf2)
         
-        cat_q1 = torch.stack(
-            [q_rand[0], q_pred[0], q_next_actions[0], q_curr_actions[0]], 1
+        cat_q1 = torch.cat(
+            [q_rand[0], q_value[0].view(-1,1,1), q_next_actions[0], q_curr_actions[0]], 1
         )
-        cat_q2 = torch.stack(
-            [q_rand[1], q_pred[1], q_next_actions[1], q_curr_actions[1]], 1
+        cat_q2 = torch.cat(
+            [q_rand[1], q_value[1].view(-1,1,1), q_next_actions[1], q_curr_actions[1]], 1
         )
         std_q1 = torch.std(cat_q1, dim=1)
         std_q2 = torch.std(cat_q2, dim=1)
@@ -384,49 +384,48 @@ class CQLPolicy(Policy):
             # importance sammpled version
             random_density = np.log(0.5 ** curr_actions_tensor.shape[-1])
             if self._cat_q_type==0:
-                cat_q1 = torch.stack(
+                cat_q1 = torch.cat(
                     [q_rand[0] - random_density, q_next_actions[0] - new_log_pis.detach()], 1
                 )
-                cat_q2 = torch.stack(
+                cat_q2 = torch.cat(
                     [q_rand[1] - random_density, q_next_actions[1] - new_log_pis.detach()], 1
                 )
             elif self._cat_q_type==1:
-                cat_q1 = torch.stack(
+                cat_q1 = torch.cat(
                     [q_rand[0] - random_density, q_curr_actions[0] - curr_log_pis.detach()], 1
                 )
-                cat_q2 = torch.stack(
+                cat_q2 = torch.cat(
                     [q_rand[1] - random_density, q_curr_actions[1] - curr_log_pis.detach()], 1
                 )
             elif self._cat_q_type==2:
-                cat_q1 = torch.stack(
+                cat_q1 = torch.cat(
                     [q_next_actions[0] - new_log_pis.detach(), q_curr_actions[0] - curr_log_pis.detach()], 1
                 )
-                cat_q2 = torch.stack(
+                cat_q2 = torch.cat(
                     [q_next_actions[1] - new_log_pis.detach(), q_curr_actions[1] - curr_log_pis.detach()], 1
                 )
             elif self._cat_q_type==3:
-                cat_q1 = torch.stack([q_rand[0] - random_density], 1)
-                cat_q2 = torch.stack([q_rand[1] - random_density], 1)
+                cat_q1 = torch.cat([q_rand[0] - random_density], 1)
+                cat_q2 = torch.cat([q_rand[1] - random_density], 1)
             elif self._cat_q_type==4:
-                cat_q1 = torch.stack([q_next_actions[0] - new_log_pis.detach()], 1)
-                cat_q2 = torch.stack([q_next_actions[1] - new_log_pis.detach()], 1)
+                cat_q1 = torch.cat([q_next_actions[0] - new_log_pis.detach()], 1)
+                cat_q2 = torch.cat([q_next_actions[1] - new_log_pis.detach()], 1)
             elif self._cat_q_type==5:
-                cat_q1 = torch.stack([q_curr_actions[0] - curr_log_pis.detach()], 1)
-                cat_q2 = torch.stack([q_curr_actions[1] - curr_log_pis.detach()], 1)
+                cat_q1 = torch.cat([q_curr_actions[0] - curr_log_pis.detach()], 1)
+                cat_q2 = torch.cat([q_curr_actions[1] - curr_log_pis.detach()], 1)
             else:
-                cat_q1 = torch.stack(
+                cat_q1 = torch.cat(
                     [q_rand[0] - random_density, q_next_actions[0] - new_log_pis.detach(), q_curr_actions[0] - curr_log_pis.detach()], 1
                 )
-                cat_q2 = torch.stack(
+                cat_q2 = torch.cat(
                     [q_rand[1] - random_density, q_next_actions[1] - new_log_pis.detach(), q_curr_actions[1] - curr_log_pis.detach()], 1
                 )
-            
         min_qf1_loss = torch.logsumexp(cat_q1 / self.temp, dim=1,).mean() * self.min_q_weight * self.temp
         min_qf2_loss = torch.logsumexp(cat_q2 / self.temp, dim=1,).mean() * self.min_q_weight * self.temp
                     
         """Subtract the log likelihood of data"""
-        min_qf1_loss = min_qf1_loss - q_pred[0].mean() * self.min_q_weight
-        min_qf2_loss = min_qf2_loss - q_pred[1].mean() * self.min_q_weight
+        min_qf1_loss = min_qf1_loss - q_value[0].mean() * self.min_q_weight
+        min_qf2_loss = min_qf2_loss - q_value[1].mean() * self.min_q_weight
         
         if self.with_lagrange:
             alpha_prime = torch.clamp(self.log_alpha_prime.exp(), min=0.0, max=1000000.0)
@@ -688,10 +687,14 @@ class CQLPolicy(Policy):
         log_prob = dist.log_prob(pred).unsqueeze(-1)
         log_prob = log_prob - torch.log(y).sum(-1, keepdim=True)
         
-        return action, log_prob.squeeze(-1)
+        return action, log_prob.view(-1, num_actions, 1)
     
     def _get_q_value(self, data: Dict, keep=True) -> Tensor:
         new_q_value = self._learn_model.forward(data, mode='compute_critic')['q_value']
+        if self._twin_critic:
+            new_q_value = [value.view(-1, self._num_actions, 1) for value in new_q_value]
+        else:
+            new_q_value = new_q_value.view(-1, self._num_actions, 1)
         if self._twin_critic and not keep:
             new_q_value = torch.min(new_q_value[0], new_q_value[1])
         return new_q_value
