@@ -360,12 +360,17 @@ class CQLPolicy(Policy):
         random_actions_tensor = torch.FloatTensor(curr_actions_tensor.shape).uniform_(-1,
                                                                                       1).to(curr_actions_tensor.device)
 
-        q_pred = self._get_q_value({'obs': obs, 'action': data['action']})
-        q_rand = self._get_q_value({'obs': obs, 'action': random_actions_tensor})
+        obs_repeat = obs.unsqueeze(1).repeat(1, self._num_actions, 1).view(obs.shape[0] *
+                                                                           self._num_actions, obs.shape[1])
+        act_repeat = data['action'].unsqueeze(1).repeat(1, self._num_actions, 1).view(data['action'].shape[0] *
+                                                                                      self._num_actions,
+                                                                                      data['action'].shape[1])
+        q_pred = self._get_q_value({'obs': obs_repeat, 'action': act_repeat})
+        q_rand = self._get_q_value({'obs': obs_repeat, 'action': random_actions_tensor})
         # q2_rand = self._get_q_value(obs, random_actions_tensor, network=self.qf2)
-        q_curr_actions = self._get_q_value({'obs': obs, 'action': curr_actions_tensor})
+        q_curr_actions = self._get_q_value({'obs': obs_repeat, 'action': curr_actions_tensor})
         # q2_curr_actions = self._get_tensor_values(obs, curr_actions_tensor, network=self.qf2)
-        q_next_actions = self._get_q_value({'obs': obs, 'action': new_curr_actions_tensor})
+        q_next_actions = self._get_q_value({'obs': obs_repeat, 'action': new_curr_actions_tensor})
         # q2_next_actions = self._get_tensor_values(obs, new_curr_actions_tensor, network=self.qf2)
 
         cat_q1 = torch.stack([q_rand[0], q_pred[0], q_next_actions[0], q_curr_actions[0]], 1)
@@ -411,7 +416,9 @@ class CQLPolicy(Policy):
             self.alpha_prime_optimizer.step()
 
         loss_dict['critic_loss'] += min_qf1_loss
-        loss_dict['twin_critic_loss'] += min_qf2_loss
+        if self._twin_critic:
+            loss_dict['twin_critic_loss'] += min_qf2_loss
+
 
         # update q network
         self._optimizer_q.zero_grad()
@@ -642,7 +649,7 @@ class CQLPolicy(Policy):
         # evaluate to get action distribution
         obs = data['obs']
         obs = obs.unsqueeze(1).repeat(1, num_actions, 1).view(obs.shape[0] * num_actions, obs.shape[1])
-        (mu, sigma) = self._learn_model.forward(data['obs'], mode='compute_actor')['logit']
+        (mu, sigma) = self._learn_model.forward(obs, mode='compute_actor')['logit']
         dist = Independent(Normal(mu, sigma), 1)
         pred = dist.rsample()
         action = torch.tanh(pred)
@@ -650,7 +657,7 @@ class CQLPolicy(Policy):
         # evaluate action log prob depending on Jacobi determinant.
         y = 1 - action.pow(2) + epsilon
         log_prob = dist.log_prob(pred).unsqueeze(-1)
-        log_prob = log_prob - torch.log(y).sum(-1, keepdim=True)
+        log_prob = log_prob - torch.log(y).sum(-1, keepdlinearim=True)
 
         return action, log_prob.squeeze(-1)
 
