@@ -201,7 +201,7 @@ class CQLPolicy(Policy):
         self._cat_q_type = self._cfg.learn.cat_q_type
         self.temp = 1.
         self.min_q_weight = self._cfg.learn.min_q_weight
-        self.with_lagrange = True
+        self.with_lagrange = self._cfg.learn.with_lagrange
         self.lagrange_thresh = self._cfg.learn.lagrange_thresh
         if self.with_lagrange:
             self.target_action_gap = self.lagrange_thresh
@@ -336,7 +336,11 @@ class CQLPolicy(Policy):
                         target_q_value = target_q_value - self._alpha * next_log_prob.squeeze(-1)
 
         target_value = next_v_value if self._value_network else target_q_value
-
+        # just for print target_v
+        if done is not None:
+            target_v = self._gamma * (1 - done) * target_value + reward
+        else:
+            target_v = self._gamma * target_value + reward
         # =================
         # q network
         # =================
@@ -436,7 +440,6 @@ class CQLPolicy(Policy):
             alpha_prime_loss = (-min_qf1_loss - min_qf2_loss)*0.5 
             alpha_prime_loss.backward(retain_graph=True)
             self.alpha_prime_optimizer.step()
-
         loss_dict['critic_loss'] += min_qf1_loss
         if self._twin_critic:
             loss_dict['twin_critic_loss'] += min_qf2_loss
@@ -523,6 +526,11 @@ class CQLPolicy(Policy):
             'td_error': td_error_per_sample.detach().mean().item(),
             'alpha': self._alpha.item(),
             'target_value': target_value.detach().mean().item(),
+            'target_v': target_v.detach().mean().item(),
+            'q_value_0': q_value[0].detach().mean().item(),
+            'q_value_1': q_value[1].detach().mean().item(),
+            'min_qf1_loss': min_qf1_loss.detach().mean().item(),
+            'min_qf2_loss': min_qf2_loss.detach().mean().item(),
             **info_dict,
             **loss_dict
         }
@@ -663,13 +671,13 @@ class CQLPolicy(Policy):
         twin_critic = ['twin_critic_loss'] if self._twin_critic else []
         if self._auto_alpha:
             return super()._monitor_vars_learn() + [
-                'alpha_loss', 'policy_loss', 'critic_loss', 'cur_lr_q', 'cur_lr_p', 'target_q_value', 'q_value_1',
-                'q_value_2', 'alpha', 'td_error', 'target_value'
+                'alpha_loss', 'policy_loss', 'critic_loss', 'cur_lr_q', 'cur_lr_p', 'target_q_value', 
+                'alpha', 'td_error', 'target_value', 'target_v', 'q_value_0', 'q_value_1', 'min_qf1_loss', 'min_qf2_loss'
             ] + twin_critic
         else:
             return super()._monitor_vars_learn() + [
-                'policy_loss', 'critic_loss', 'cur_lr_q', 'cur_lr_p', 'target_q_value', 'q_value_1', 'q_value_2',
-                'alpha', 'td_error', 'target_value'
+                'policy_loss', 'critic_loss', 'cur_lr_q', 'cur_lr_p', 'target_q_value',
+                'alpha', 'td_error', 'target_value', 'target_v', 'q_value_0', 'q_value_1', 'min_qf1_loss', 'min_qf2_loss'
             ] + twin_critic
 
     def _get_policy_actions(self, data: Dict, num_actions=10, epsilon: float=1e-6) -> List:

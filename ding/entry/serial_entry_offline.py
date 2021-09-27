@@ -72,7 +72,6 @@ def serial_pipeline_offline(
     # Learner's before_run hook.
     learner.call_hook('before_run')
     stop = False
-
     for epoch in range(cfg.policy.learn.train_epoch):
         # Evaluate policy performance
         for i, train_data in enumerate(dataloader):

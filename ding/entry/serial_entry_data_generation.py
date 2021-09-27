@@ -4,6 +4,7 @@ import torch
 import logging
 from functools import partial
 from tensorboardX import SummaryWriter
+import numpy as np
 
 from ding.envs import get_vec_env_setting, create_env_manager
 from ding.worker import BaseLearner, SampleCollector, BaseSerialEvaluator, BaseSerialCommander, create_buffer, \
@@ -93,6 +94,12 @@ def serial_pipeline_data_generation(
 
     collect_kwargs = commander.step()
     new_data = collector.collect(n_sample=cfg.policy.other.replay_buffer.replay_buffer_size, policy_kwargs=collect_kwargs)
+    new_data, new_trajs = reshuffle_dataset(new_data, cfg.env.collector_env_num, full_episode = cfg.policy.generate.full_episode)
+    compute_episode(new_trajs, cfg.env.collector_env_num, visualization = {
+        'flag':cfg.policy.generate.visualization, 
+        'title':cfg.policy.generate.vis_title,
+        'vis_path':cfg.policy.generate.vis_path,
+    })
     replay_buffer.push(new_data, cur_collector_envstep=0)
 
     # Save replay buffer data
@@ -105,3 +112,87 @@ def serial_pipeline_data_generation(
     # learner.call_hook('after_run')
 
     return policy
+
+
+def reshuffle_dataset(data: List, collect_env: int, full_episode = False) -> List:
+    indices = np.repeat(np.arange(collect_env), (len(data)//collect_env)).tolist() + \
+              np.arange(len(data)%collect_env).tolist()
+    base_indices = (collect_env * np.tile(np.arange(len(data)//collect_env), collect_env)).tolist() + \
+                   np.array([len(data)//collect_env * collect_env]).repeat(len(data)%collect_env).tolist()
+    print(np.array(indices)+np.array(base_indices))
+    new_data = [data[i] for i in (np.array(indices)+np.array(base_indices)).tolist()]
+    new_trajs={i: new_data[i * len(new_data)//collect_env:(i+1) * len(new_data)//collect_env] for i in range(collect_env)}
+    if full_episode:
+        trajs = {i: new_data[i * len(new_data)//collect_env:(i+1) * len(new_data)//collect_env] for i in range(collect_env)}
+        new_data = []
+        new_trajs = {}
+        for env_ids, transitions in trajs.items():
+            done_index = 0
+            for i in range(len(transitions)-1, -1, -1):
+                if transitions[i]['done']:
+                    done_index = i
+                    break
+            new_data.extend(transitions[:done_index+1])
+            new_trajs[env_ids]=transitions[:done_index+1]
+    return new_data, new_trajs
+
+
+
+
+def compute_episode(new_trajs: dict, collect_env: int, visualization: dict = {'flag': False, 'title':"", 'vis_path': ""}) -> List:
+
+    # trajs = {i: data[i * len(data)//collect_env:(i+1) * len(data)//collect_env] for i in range(collect_env)}
+
+    episode_info = []
+    for env_ids, transitions in new_trajs.items():
+        lens = 0
+        sum_reward = 0
+        for transition in transitions:
+            sum_reward += transition['reward']
+            lens+=1
+            if transition['done']:
+                episode_info.append({'rew': sum_reward.item(), 'done': True, 'length': lens, 'env': env_ids})
+                sum_reward = 0
+                lens = 0
+        if sum_reward:
+            episode_info.append({'rew': sum_reward.item(), 'done': False, 'length': lens, 'env': env_ids})
+            # sum_reward = 0
+
+    done_episode = [i['rew'] for i in episode_info if i['done']]
+    print(f"episode numbers: {len(episode_info)}, "
+          f"done episode numbers: {len(done_episode)},"
+          f"done_avg_reward: {sum(done_episode)/len(done_episode)}")
+    if visualization['flag']:
+        reward_analysis(episode_info, visualization['title'], visualization['vis_path'])
+
+
+def reward_analysis(episode_info: dict, title: str, path: str):
+    import matplotlib.pyplot as plt
+    import seaborn as sns
+    rewards = []
+    lens = []
+    for d in episode_info:
+        if d['done']:
+            rewards.append(d['rew'])
+            lens.append(d['length'])
+
+    rewards = np.array(rewards)
+    lens = np.array(lens)
+    print(f'avg rews: {rewards.mean()}, avg lengths: {lens.mean()}')
+
+
+    hfont = {'family':'Times New Roman', 'size': '15'}
+    fig, ax = plt.subplots()
+
+    plt.grid(linestyle='--', alpha=0.5)
+    ax.set_ylabel('Numbers of path', hfont)
+    ax.set_xlabel('Episode rewards', hfont)
+    plt.title(title, hfont)
+    # plt.text(0.04, 0.8, f'max reward: {int(rewards.max())}\n\
+    plt.text(0.74, 0.8, f'max reward: {int(rewards.max())}\n\
+min reward: {int(rewards.min())}\n\
+avg reward: {int(rewards.mean())}\n\
+avg length: {int(lens.mean())}', transform=ax.transAxes)
+
+    plt.hist(rewards, bins=50)
+    plt.savefig(path)

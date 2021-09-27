@@ -287,15 +287,15 @@ class DDPGCQLPolicy(Policy):
         q_next_actions = self._get_q_value({'obs': obs_repeat, 'action': new_curr_actions_tensor})
         # q2_next_actions = self._get_tensor_values(obs, new_curr_actions_tensor, network=self.qf2)
         if self._twin_critic:
-            cat_q1 = torch.stack(
-                [q_rand[0], q_pred[0], q_next_actions[0], q_curr_actions[0]], 1
+            cat_q1 = torch.cat(
+                [q_rand[0], q_value[0].view(-1,1,1), q_next_actions[0], q_curr_actions[0]], 1
             )
-            cat_q2 = torch.stack(
-                [q_rand[1], q_pred[1], q_next_actions[1], q_curr_actions[1]], 1
+            cat_q2 = torch.cat(
+                [q_rand[1], q_value[1].view(-1,1,1), q_next_actions[1], q_curr_actions[1]], 1
             )
         else:
-            cat_q1 = torch.stack(
-                [q_rand, q_pred, q_next_actions, q_curr_actions], 1
+            cat_q1 = torch.cat(
+                [q_rand, q_value.view(-1,1,1), q_next_actions, q_curr_actions], 1
             )
         if self.min_q_version == 3:
             # importance sammpled version
@@ -303,16 +303,16 @@ class DDPGCQLPolicy(Policy):
             # import ipdb
             # ipdb.set_trace()
             if self._twin_critic:
-                cat_q1 = torch.stack(
+                cat_q1 = torch.cat(
                     [q_rand[0] - random_density, q_next_actions[0],
                      q_curr_actions[0]], 1
                 )
-                cat_q2 = torch.stack(
+                cat_q2 = torch.cat(
                     [q_rand[1] - random_density, q_next_actions[1],
                      q_curr_actions[1]], 1
                 )
             else:
-                cat_q1 = torch.stack(
+                cat_q1 = torch.cat(
                     [q_rand - random_density, q_next_actions,
                      q_curr_actions], 1
                 )
@@ -323,10 +323,10 @@ class DDPGCQLPolicy(Policy):
 
         """Subtract the log likelihood of data"""
         if self._twin_critic:
-            min_qf1_loss = min_qf1_loss - q_pred[0].mean() * self.min_q_weight
-            min_qf2_loss = min_qf2_loss - q_pred[1].mean() * self.min_q_weight
+            min_qf1_loss = min_qf1_loss - q_value[0].mean() * self.min_q_weight
+            min_qf2_loss = min_qf2_loss - q_value[1].mean() * self.min_q_weight
         else:
-            min_qf1_loss = min_qf1_loss - q_pred.mean() * self.min_q_weight
+            min_qf1_loss = min_qf1_loss - q_value.mean() * self.min_q_weight
         if self.with_lagrange:
             alpha_prime = torch.clamp(self.log_alpha_prime.exp(), min=0.0, max=1000000.0)
             min_qf1_loss = alpha_prime * (min_qf1_loss - self.target_action_gap)
@@ -487,7 +487,6 @@ class DDPGCQLPolicy(Policy):
             data = to_device(data, self._device)
         self._eval_model.eval()
         with torch.no_grad():
-            import ipdb;ipdb.set_trace()
             output = self._eval_model.forward(data, mode='compute_actor')
         if self._cuda:
             output = to_device(output, 'cpu')
@@ -524,7 +523,10 @@ class DDPGCQLPolicy(Policy):
     def _get_q_value(self, data: Dict, keep=True):
 
         new_q_value = self._learn_model.forward(data, mode='compute_critic')['q_value']
+        if self._twin_critic:
+            new_q_value = [value.view(-1, self._num_actions, 1) for value in new_q_value]
+        else:
+            new_q_value = new_q_value.view(-1, self._num_actions, 1)
         if self._twin_critic and not keep:
             new_q_value = torch.min(new_q_value[0], new_q_value[1])
-
         return new_q_value
