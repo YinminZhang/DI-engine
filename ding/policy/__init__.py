@@ -6,6 +6,7 @@ from .c51 import C51Policy
 from .rainbow import RainbowDQNPolicy
 from .ddpg import DDPGPolicy
 from .td3 import TD3Policy
+from .td3_bc import TD3BCPolicy
 from .a2c import A2CPolicy
 from .ppo import PPOPolicy
 from .sac import SACPolicy

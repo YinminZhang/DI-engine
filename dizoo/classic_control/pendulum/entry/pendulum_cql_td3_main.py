@@ -1,31 +1,32 @@
 import torch
 from copy import deepcopy
 
-from dizoo.classic_control.pendulum.config.pendulum_sac_data_generation_default_config import main_config, create_config
+from dizoo.classic_control.pendulum.config.pendulum_td3_data_generation_config import main_config, create_config
 from ding.entry import serial_pipeline_offline, collect_demo_data, eval, serial_pipeline
 
 
 def train_cql(args):
     from dizoo.classic_control.pendulum.config.pendulum_cql_config import main_config, create_config
-    main_config.exp_name = 'cql_sac_shuffle'
-    main_config.policy.learn.data_path = './sac/expert_demos.hdf5'
+    main_config.exp_name = 'cql_td3'
+    main_config.policy.learn.data_path = './td3/expert_demos.hdf5'
     main_config.policy.learn.data_type = 'hdf5'
     config = deepcopy([main_config, create_config])
     serial_pipeline_offline(config, seed=args.seed)
 
 
 def eval_ckpt(args):
-    main_config.exp_name = 'sac'
-    main_config.policy.learn.learner.load_path = './sac/ckpt/ckpt_best.pth.tar'
-    main_config.policy.learn.learner.hook.load_ckpt_before_run = './sac/ckpt/ckpt_best.pth.tar'
+    main_config.exp_name = 'td3'
+    main_config.policy.learn.learner.load_path = './td3/ckpt/ckpt_best.pth.tar'
+    main_config.policy.learn.learner.hook.load_ckpt_before_run = './td3/ckpt/ckpt_best.pth.tar'
+    state_dict = torch.load(main_config.policy.learn.learner.load_path, map_location='cpu')
     config = deepcopy([main_config, create_config])
-    eval(config, seed=args.seed, load_path=main_config.policy.learn.learner.hook.load_ckpt_before_run)
-
+    # eval(config, seed=args.seed, load_path=main_config.policy.learn.learner.hook.load_ckpt_before_run)
+    eval(config, seed=args.seed, state_dict=state_dict)
 
 def generate(args):
-    main_config.exp_name = 'sac'
-    main_config.policy.learn.learner.load_path = './sac/ckpt/ckpt_best.pth.tar'
-    main_config.policy.learn.save_path = './sac/expert.pkl'
+    main_config.exp_name = 'td3'
+    main_config.policy.learn.learner.load_path = './td3/ckpt/ckpt_best.pth.tar'
+    main_config.policy.learn.save_path = './td3/expert.pkl'
     # main_config.policy.learn.data_type = 'hdf5'
     config = deepcopy([main_config, create_config])
     state_dict = torch.load(main_config.policy.learn.learner.load_path, map_location='cpu')
@@ -33,8 +34,8 @@ def generate(args):
                       seed=args.seed, expert_data_path=main_config.policy.learn.save_path, state_dict=state_dict)
 
 def train_expert(args):
-    from dizoo.classic_control.pendulum.config.pendulum_sac_config import main_config, create_config
-    main_config.exp_name = 'sac'
+    from dizoo.classic_control.pendulum.config.pendulum_td3_config import main_config, create_config
+    main_config.exp_name = 'td3'
     config = deepcopy([main_config, create_config])
     serial_pipeline(config, seed=args.seed)
 
@@ -47,6 +48,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # train_expert(args)
-    # eval_ckpt(args)
-    # generate(args)
-    train_cql(args)
+    eval_ckpt(args)
+    generate(args)
+    # train_cql(args)

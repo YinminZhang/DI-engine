@@ -1,7 +1,7 @@
 from easydict import EasyDict
 
-pendulum_td3_config = dict(
-    exp_name='td3',
+pendulum_ddpg_config = dict(
+    exp_name='ddpg',
     env=dict(
         collector_env_num=8,
         evaluator_env_num=5,
@@ -17,7 +17,7 @@ pendulum_td3_config = dict(
         model=dict(
             obs_shape=3,
             action_shape=1,
-            twin_critic=True,
+            twin_critic=False,
             actor_head_type='regression',
         ),
         learn=dict(
@@ -26,12 +26,15 @@ pendulum_td3_config = dict(
             learning_rate_actor=0.001,
             learning_rate_critic=0.001,
             ignore_done=True,
-            actor_update_freq=2,
-            noise=True,
-            noise_sigma=0.1,
-            noise_range=dict(
-                min=-0.5,
-                max=0.5,
+            actor_update_freq=1,
+            noise=False,
+            save_path='./ddpg/expert.pkl',
+            learner = dict(
+                load_path='./ddpg/ckpt/ckpt_best.pth.tar',
+                hook=dict(
+                    load_ckpt_before_run='./ddpg/ckpt/ckpt_best.pth.tar',
+                    save_ckpt_after_run=False,
+                )
             ),
         ),
         collect=dict(
@@ -40,19 +43,22 @@ pendulum_td3_config = dict(
             collector=dict(collect_print_freq=1000, ),
         ),
         eval=dict(evaluator=dict(eval_freq=100, ), ),
-        other=dict(replay_buffer=dict(replay_buffer_size=20000, ), ),
+        other=dict(replay_buffer=dict(
+            replay_buffer_size=10000,
+            max_use=16,
+        ), ),
     ),
 )
-pendulum_td3_config = EasyDict(pendulum_td3_config)
-main_config = pendulum_td3_config
+pendulum_ddpg_config = EasyDict(pendulum_ddpg_config)
+main_config = pendulum_ddpg_config
 
-pendulum_td3_create_config = dict(
+pendulum_ddpg_create_config = dict(
     env=dict(
         type='pendulum',
         import_names=['dizoo.classic_control.pendulum.envs.pendulum_env'],
     ),
     env_manager=dict(type='base'),
-    policy=dict(type='td3'),
+    policy=dict(type='ddpg'),
 )
-pendulum_td3_create_config = EasyDict(pendulum_td3_create_config)
-create_config = pendulum_td3_create_config
+pendulum_ddpg_create_config = EasyDict(pendulum_ddpg_create_config)
+create_config = pendulum_ddpg_create_config
