@@ -73,7 +73,7 @@ class SACPolicy(Policy):
         # (str) RL policy register name (refer to function "POLICY_REGISTRY").
         type='sac',
         # (bool) Whether to use cuda for network.
-        cuda=False,
+        cuda=True,
         # (bool type) on_policy: Determine whether on-policy or off-policy.
         # on-policy setting influences the behaviour of buffer.
         # Default False in SAC.

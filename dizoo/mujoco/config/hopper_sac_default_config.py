@@ -41,7 +41,7 @@ hopper_sac_default_config = dict(
             unroll_len=1,
         ),
         command=dict(),
-        eval=dict(),
+        eval=dict(evaluator=dict(eval_freq=10000, )),
         other=dict(replay_buffer=dict(replay_buffer_size=1000000, ), ),
     ),
 )

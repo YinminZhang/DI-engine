@@ -40,11 +40,11 @@ hopper_cql_default_config = dict(
         collect=dict(
             n_sample=1,
             unroll_len=1,
-            data_type='naive',
-            data_path='./default_experiment/expert_iteration_200000.pkl',
+            data_type='d4rl',
+            # data_path='./default_experiment/expert_iteration_200000.pkl',
         ),
         command=dict(),
-        eval=dict(evaluator=dict(eval_freq=500, )),
+        eval=dict(evaluator=dict(eval_freq=10000, )),
         other=dict(replay_buffer=dict(replay_buffer_size=2000000, ), ),
     ),
 )
