@@ -13,17 +13,16 @@ from ding.rl_utils import v_1step_td_data, v_1step_td_error, get_train_sample, \
 from ding.model import model_wrap
 from ding.utils import POLICY_REGISTRY
 from ding.utils.data import default_collate, default_decollate
-from .sac import SACPolicy
 from .dqn import DQNPolicy
+from .base_policy import Policy
 from .common_utils import default_preprocess_learn
 
 
 @POLICY_REGISTRY.register('cql')
-class CQLPolicy(SACPolicy):
+class CQLPolicy(Policy):
     r"""
        Overview:
            Policy class of CQL algorithm.
-
        Config:
            == ====================  ========    =============  ================================= =======================
            ID Symbol                Type        Default Value  Description                       Other(Shape)
@@ -146,8 +145,6 @@ class CQLPolicy(SACPolicy):
             # Default to False.
             # Note that: Using auto alpha needs to set learning_rate_alpha in `cfg.policy.learn`.
             auto_alpha=True,
-            # (bool type) log_space: Determine whether to use auto `\alpha` in log space.
-            log_space=True,
             # (bool) Whether ignore done(usually for max step termination env. e.g. pendulum)
             # Note: Gym wraps the MuJoCo envs by default with TimeLimit environment wrappers.
             # These limit HalfCheetah, and several other MuJoCo envs, to max length of 1000.
@@ -158,14 +155,8 @@ class CQLPolicy(SACPolicy):
             ignore_done=False,
             # (float) Weight uniform initialization range in the last output layer
             init_w=3e-3,
-            # (int) The numbers of action sample each at every state s from a uniform-at-random
+            
             num_actions=10,
-            # (bool) Whether use lagrange multiplier in q value loss.
-            with_lagrange=False,
-            # (float) The threshold for difference in Q-values
-            lagrange_thresh=-1,
-            # (float) Loss weight for conservative item.
-            min_q_weight=1.0,
         ),
         collect=dict(
             # You can use either "n_sample" or "n_episode" in actor.collect.
@@ -201,29 +192,38 @@ class CQLPolicy(SACPolicy):
         # Init
         self._priority = self._cfg.priority
         self._priority_IS_weight = self._cfg.priority_IS_weight
-        self._value_network = False
+        self._value_network = False  # TODO self._cfg.model.value_network
         self._twin_critic = self._cfg.model.twin_critic
         self._num_actions = self._cfg.learn.num_actions
 
-        self._min_q_version = 3
-        self._min_q_weight = self._cfg.learn.min_q_weight
-        self._with_lagrange = self._cfg.learn.with_lagrange and (self._lagrange_thresh > 0)
-        self._lagrange_thresh = self._cfg.learn.lagrange_thresh
-        if self._with_lagrange:
-            self.target_action_gap = self._lagrange_thresh
+        self.min_q_version = 3
+        self.min_q_weight = self._cfg.learn.min_q_weight
+        self.with_lagrange = self._cfg.learn.with_lagrange
+        self.lagrange_thresh = self._cfg.learn.lagrange_thresh
+        if self.with_lagrange:
+            self.target_action_gap = self.lagrange_thresh
             self.log_alpha_prime = torch.tensor(0.).to(self._device).requires_grad_()
             self.alpha_prime_optimizer = Adam(
                 [self.log_alpha_prime],
                 lr=self._cfg.learn.learning_rate_q,
             )
-        self._clip = self._cfg.learn.clip
-        self._clip_value = self._cfg.learn.clip_value
+
+
         # Weight Init
         init_w = self._cfg.learn.init_w
         self._model.actor[2].mu.weight.data.uniform_(-init_w, init_w)
         self._model.actor[2].mu.bias.data.uniform_(-init_w, init_w)
         self._model.actor[2].log_sigma_layer.weight.data.uniform_(-init_w, init_w)
         self._model.actor[2].log_sigma_layer.bias.data.uniform_(-init_w, init_w)
+        if self._cfg.learn.critic_init:
+            if self._twin_critic:
+                self._model.critic[0][2].last.weight.data.uniform_(-init_w, init_w)
+                self._model.critic[0][2].last.bias.data.uniform_(-init_w, init_w)
+                self._model.critic[1][2].last.weight.data.uniform_(-init_w, init_w)
+                self._model.critic[1][2].last.bias.data.uniform_(-init_w, init_w)
+            else:
+                self._model.critic[2].last.weight.data.uniform_(-init_w, init_w)
+                self._model.critic[2].last.bias.data.uniform_(-init_w, init_w)
 
         # Optimizers
         if self._value_network:
@@ -244,20 +244,13 @@ class CQLPolicy(SACPolicy):
         self._gamma = self._cfg.learn.discount_factor
         # Init auto alpha
         if self._cfg.learn.auto_alpha:
-            self._target_entropy = self._cfg.learn.get('target_entropy', -np.prod(self._cfg.model.action_shape))
-            if self._cfg.learn.log_space:
-                self._log_alpha = torch.log(torch.FloatTensor([self._cfg.learn.alpha]))
-                self._log_alpha = self._log_alpha.to(self._device).requires_grad_()
-                self._alpha_optim = torch.optim.Adam([self._log_alpha], lr=self._cfg.learn.learning_rate_alpha)
-                assert self._log_alpha.shape == torch.Size([1]) and self._log_alpha.requires_grad
-                self._alpha = self._log_alpha.detach().exp()
-                self._auto_alpha = True
-                self._log_space = True
-            else:
-                self._alpha = torch.FloatTensor([self._cfg.learn.alpha]).to(self._device).requires_grad_()
-                self._alpha_optim = torch.optim.Adam([self._alpha], lr=self._cfg.learn.learning_rate_alpha)
-                self._auto_alpha = True
-                self._log_space = False
+            self._target_entropy = -np.prod(self._cfg.model.action_shape)
+            self._log_alpha = torch.log(torch.FloatTensor([self._cfg.learn.alpha]))
+            self._log_alpha = self._log_alpha.to(self._device).requires_grad_()
+            self._alpha_optim = torch.optim.Adam([self._log_alpha], lr=self._cfg.learn.learning_rate_alpha)
+            self._auto_alpha = True
+            assert self._log_alpha.shape == torch.Size([1]) and self._log_alpha.requires_grad
+            self._alpha = self._log_alpha.detach().exp()
         else:
             self._alpha = torch.tensor(
                 [self._cfg.learn.alpha], requires_grad=False, device=self._device, dtype=torch.float32
@@ -277,6 +270,7 @@ class CQLPolicy(SACPolicy):
         self._target_model.reset()
 
         self._forward_learn_cnt = 0
+        
 
     def _forward_learn(self, data: dict) -> Dict[str, Any]:
         r"""
@@ -295,82 +289,84 @@ class CQLPolicy(SACPolicy):
             ignore_done=self._cfg.learn.ignore_done,
             use_nstep=False
         )
-        if len(data.get('action').shape) == 1:
-            data['action'] = data['action'].reshape(-1, 1)
-
         if self._cuda:
             data = to_device(data, self._device)
 
         self._learn_model.train()
         self._target_model.train()
-        obs = data['obs']
-        next_obs = data['next_obs']
-        reward = data['reward']
-        done = data['done']
+        obs = data.get('obs')
+        next_obs = data.get('next_obs')
+        reward = data.get('reward')
+        done = data.get('done')
 
-        # 1. predict q value
+        # predict q value
         q_value = self._learn_model.forward(data, mode='compute_critic')['q_value']
 
-        # 2. predict target value
+        # predict target value depend self._value_network.
         if self._value_network:
             # predict v value
             v_value = self._learn_model.forward(obs, mode='compute_value_critic')['v_value']
             with torch.no_grad():
                 next_v_value = self._target_model.forward(next_obs, mode='compute_value_critic')['v_value']
-            target_q_value = next_v_value
         else:
-            # target q value.
+            # target q value. SARSA: first predict next action, then calculate next q value
             with torch.no_grad():
                 (mu, sigma) = self._learn_model.forward(next_obs, mode='compute_actor')['logit']
 
                 dist = Independent(Normal(mu, sigma), 1)
                 pred = dist.rsample()
                 next_action = torch.tanh(pred)
-                y = 1 - next_action.pow(2) + 1e-6
+                y = 1 - next_action.pow(2) + 1e-6               
                 next_log_prob = dist.log_prob(pred).unsqueeze(-1)
                 next_log_prob = next_log_prob - torch.log(y).sum(-1, keepdim=True)
-
                 next_data = {'obs': next_obs, 'action': next_action}
                 target_q_value = self._target_model.forward(next_data, mode='compute_critic')['q_value']
                 # the value of a policy according to the maximum entropy objective
                 if self._twin_critic:
                     # find min one as target q value
-                    target_q_value = torch.min(target_q_value[0], target_q_value[1])
-                else:
-                    target_q_value = target_q_value
+                    target_q_value = torch.min(target_q_value[0],  target_q_value[1]) 
 
-        # 3. compute q loss
+        target_value = next_v_value if self._value_network else target_q_value
+        # just for print target_v
+        if done is not None:
+            target_v = self._gamma * (1 - done) * target_value + reward
+        else:
+            target_v = self._gamma * target_value + reward
+        # =================
+        # q network
+        # =================
+        # compute q loss
         if self._twin_critic:
-            q_data0 = v_1step_td_data(q_value[0], target_q_value, reward, done, data['weight'])
+            q_data0 = v_1step_td_data(q_value[0], target_value, reward, done, data['weight'])
             loss_dict['critic_loss'], td_error_per_sample0 = v_1step_td_error(q_data0, self._gamma)
-            q_data1 = v_1step_td_data(q_value[1], target_q_value, reward, done, data['weight'])
+            q_data1 = v_1step_td_data(q_value[1], target_value, reward, done, data['weight'])
             loss_dict['twin_critic_loss'], td_error_per_sample1 = v_1step_td_error(q_data1, self._gamma)
             td_error_per_sample = (td_error_per_sample0 + td_error_per_sample1) / 2
         else:
-            q_data = v_1step_td_data(q_value, target_q_value, reward, done, data['weight'])
+            q_data = v_1step_td_data(q_value, target_value, reward, done, data['weight'])
             loss_dict['critic_loss'], td_error_per_sample = v_1step_td_error(q_data, self._gamma)
 
-        # 4. add CQL
-
+        # add CQL
         curr_actions_tensor, curr_log_pis = self._get_policy_actions(data, self._num_actions)
         new_curr_actions_tensor, new_log_pis = self._get_policy_actions({'obs': next_obs}, self._num_actions)
+        
+        # random_actions_tensor = torch.FloatTensor(q2_pred.shape[0] * self.num_random, actions.shape[-1]).uniform_(-1, 1) # .cuda()
+        random_actions_tensor = torch.FloatTensor(curr_actions_tensor.shape).uniform_(-1, 1).to(curr_actions_tensor.device)
 
-        random_actions_tensor = torch.FloatTensor(curr_actions_tensor.shape).uniform_(-1,
-                                                                                      1).to(curr_actions_tensor.device)
-
-        obs_repeat = obs.unsqueeze(1).repeat(1, self._num_actions,
-                                             1).view(obs.shape[0] * self._num_actions, obs.shape[1])
-        act_repeat = data['action'].unsqueeze(1).repeat(1, self._num_actions, 1).view(
-            data['action'].shape[0] * self._num_actions, data['action'].shape[1]
-        )
+        obs_repeat = obs.unsqueeze(1).repeat(1, self._num_actions, 1).view(obs.shape[0] *
+                                                                           self._num_actions, obs.shape[1])
+        act_repeat = data['action'].unsqueeze(1).repeat(1, self._num_actions, 1).view(data['action'].shape[0] *
+                                                                                      self._num_actions,
+                                                                                      data['action'].shape[1])
         # q_pred = self._get_q_value({'obs': obs_repeat, 'action': act_repeat})
+        # q_pred = self._get_q_value({'obs': obs, 'action': data['action']})
         q_rand = self._get_q_value({'obs': obs_repeat, 'action': random_actions_tensor})
         # q2_rand = self._get_q_value(obs, random_actions_tensor, network=self.qf2)
         q_curr_actions = self._get_q_value({'obs': obs_repeat, 'action': curr_actions_tensor})
         # q2_curr_actions = self._get_tensor_values(obs, curr_actions_tensor, network=self.qf2)
         q_next_actions = self._get_q_value({'obs': obs_repeat, 'action': new_curr_actions_tensor})
         # q2_next_actions = self._get_tensor_values(obs, new_curr_actions_tensor, network=self.qf2)
-
+        
         cat_q1 = torch.cat(
             [q_rand[0], q_value[0].view(-1,1,1), q_next_actions[0], q_curr_actions[0]], 1
         )
@@ -379,46 +375,45 @@ class CQLPolicy(SACPolicy):
         )
         std_q1 = torch.std(cat_q1, dim=1)
         std_q2 = torch.std(cat_q2, dim=1)
-        if self._min_q_version == 3:
+        if self.min_q_version == 3:
             # importance sammpled version
             random_density = np.log(0.5 ** curr_actions_tensor.shape[-1])
+            # cat_q1.shape=(256, 30, 1)
             cat_q1 = torch.cat(
                     [q_rand[0] - random_density, q_next_actions[0] - new_log_pis.detach(), q_curr_actions[0] - curr_log_pis.detach()], 1
                 )
             cat_q2 = torch.cat(
-                [q_rand[1] - random_density, q_next_actions[1] - new_log_pis.detach(), q_curr_actions[1] - curr_log_pis.detach()], 1
-            )
-
-        min_qf1_loss = torch.logsumexp(cat_q1, dim=1).mean() * self._min_q_weight
-        min_qf2_loss = torch.logsumexp(cat_q2, dim=1).mean() * self._min_q_weight
+                    [q_rand[1] - random_density, q_next_actions[1] - new_log_pis.detach(), q_curr_actions[1] - curr_log_pis.detach()], 1
+                )
+        min_qf1_loss = torch.logsumexp(cat_q1, dim=1,).mean() * self.min_q_weight
+        min_qf2_loss = torch.logsumexp(cat_q2, dim=1,).mean() * self.min_q_weight
+                    
         """Subtract the log likelihood of data"""
-        min_qf1_loss = min_qf1_loss - q_value[0].mean() * self._min_q_weight
-        min_qf2_loss = min_qf2_loss - q_value[1].mean() * self._min_q_weight
-
-        if self._with_lagrange:
+        min_qf1_loss = min_qf1_loss - q_value[0].mean() * self.min_q_weight
+        min_qf2_loss = min_qf2_loss - q_value[1].mean() * self.min_q_weight
+        
+        if self.with_lagrange:
             alpha_prime = torch.clamp(self.log_alpha_prime.exp(), min=0.0, max=1000000.0)
             min_qf1_loss = alpha_prime * (min_qf1_loss - self.target_action_gap)
             min_qf2_loss = alpha_prime * (min_qf2_loss - self.target_action_gap)
 
             self.alpha_prime_optimizer.zero_grad()
-            alpha_prime_loss = (-min_qf1_loss - min_qf2_loss) * 0.5
+            alpha_prime_loss = (-min_qf1_loss - min_qf2_loss)*0.5 
             alpha_prime_loss.backward(retain_graph=True)
             self.alpha_prime_optimizer.step()
-
         loss_dict['critic_loss'] += min_qf1_loss
         if self._twin_critic:
             loss_dict['twin_critic_loss'] += min_qf2_loss
-
-        # 5. update q network
+        
+        
+        # update q network
         self._optimizer_q.zero_grad()
         loss_dict['critic_loss'].backward(retain_graph=True)
         if self._twin_critic:
             loss_dict['twin_critic_loss'].backward()
-        if self._clip:
-            clip_grad_norm_(self._model.critic.parameters(), self._clip_value)
         self._optimizer_q.step()
 
-        # 6. evaluate to get action distribution
+        # evaluate to get action distribution
         (mu, sigma) = self._learn_model.forward(data['obs'], mode='compute_actor')['logit']
         dist = Independent(Normal(mu, sigma), 1)
         pred = dist.rsample()
@@ -432,7 +427,10 @@ class CQLPolicy(SACPolicy):
         if self._twin_critic:
             new_q_value = torch.min(new_q_value[0], new_q_value[1])
 
-        # 7. (optional)compute value loss
+        # =================
+        # value network
+        # =================
+        # compute value loss
         if self._value_network:
             # new_q_value: (bs, ), log_prob: (bs, act_shape) -> target_v_value: (bs, )
             target_v_value = (new_q_value.unsqueeze(-1)).mean(dim=-1)
@@ -443,38 +441,30 @@ class CQLPolicy(SACPolicy):
             loss_dict['value_loss'].backward()
             self._optimizer_value.step()
 
-        # 8. compute policy loss
         policy_loss = (self._alpha * log_prob - new_q_value.unsqueeze(-1)).mean()
 
         loss_dict['policy_loss'] = policy_loss
 
-        # 9. update policy network
         self._optimizer_policy.zero_grad()
         loss_dict['policy_loss'].backward()
-        if self._clip:
-            clip_grad_norm_(self._model.actor.parameters(), self._clip_value)
         self._optimizer_policy.step()
 
-        # 10. compute alpha loss
+        # compute alpha loss
         if self._auto_alpha:
-            if self._log_space:
-                log_prob = log_prob + self._target_entropy
-                loss_dict['alpha_loss'] = -(self._log_alpha * log_prob.detach()).mean()
+            log_prob = log_prob.detach() + self._target_entropy
+            loss_dict['alpha_loss'] = -(self._log_alpha * log_prob).mean()
 
-                self._alpha_optim.zero_grad()
-                loss_dict['alpha_loss'].backward()
-                self._alpha_optim.step()
-                self._alpha = self._log_alpha.detach().exp()
-            else:
-                log_prob = log_prob + self._target_entropy
-                loss_dict['alpha_loss'] = -(self._alpha * log_prob.detach()).mean()
-
-                self._alpha_optim.zero_grad()
-                loss_dict['alpha_loss'].backward()
-                self._alpha_optim.step()
-                self._alpha = max(0, self._alpha)
+            self._alpha_optim.zero_grad()
+            loss_dict['alpha_loss'].backward()
+            self._alpha_optim.step()
+            self._alpha = self._log_alpha.detach().exp()
 
         loss_dict['total_loss'] = sum(loss_dict.values())
+
+        info_dict = {}
+        if self._value_network:
+            info_dict['cur_lr_v'] = self._optimizer_value.defaults['lr']
+            
 
         # =============
         # after update
@@ -488,9 +478,160 @@ class CQLPolicy(SACPolicy):
             'priority': td_error_per_sample.abs().tolist(),
             'td_error': td_error_per_sample.detach().mean().item(),
             'alpha': self._alpha.item(),
-            'target_q_value': target_q_value.detach().mean().item(),
+            'target_value': target_value.detach().mean().item(),
+            'target_v': target_v.detach().mean().item(),
+            'q_value_0': q_value[0].detach().mean().item(),
+            'q_value_1': q_value[1].detach().mean().item(),
+            'min_qf1_loss': min_qf1_loss.detach().mean().item(),
+            'min_qf2_loss': min_qf2_loss.detach().mean().item(),
+            **info_dict,
             **loss_dict
         }
+
+    def _state_dict_learn(self) -> Dict[str, Any]:
+        ret = {
+            'model': self._learn_model.state_dict(),
+            'optimizer_q': self._optimizer_q.state_dict(),
+            'optimizer_policy': self._optimizer_policy.state_dict(),
+        }
+        if self._value_network:
+            ret.update({'optimizer_value': self._optimizer_value.state_dict()})
+        if self._auto_alpha:
+            ret.update({'optimizer_alpha': self._alpha_optim.state_dict()})
+        return ret
+
+    def _load_state_dict_learn(self, state_dict: Dict[str, Any]) -> None:
+        self._learn_model.load_state_dict(state_dict['model'])
+        self._optimizer_q.load_state_dict(state_dict['optimizer_q'])
+        if self._value_network:
+            self._optimizer_value.load_state_dict(state_dict['optimizer_value'])
+        self._optimizer_policy.load_state_dict(state_dict['optimizer_policy'])
+        if self._auto_alpha:
+            self._alpha_optim.load_state_dict(state_dict['optimizer_alpha'])
+
+    def _init_collect(self) -> None:
+        r"""
+        Overview:
+            Collect mode init method. Called by ``self.__init__``.
+            Init traj and unroll length, collect model.
+            Use action noise for exploration.
+        """
+        self._unroll_len = self._cfg.collect.unroll_len
+        # TODO remove noise
+        # self._collect_model = model_wrap(
+        #     self._model,
+        #     wrapper_name='action_noise',
+        #     noise_type='gauss',
+        #     noise_kwargs={
+        #         'mu': 0.0,
+        #         'sigma': self._cfg.collect.noise_sigma
+        #     },
+        #     noise_range=None
+        # )
+        self._collect_model = model_wrap(self._model, wrapper_name='base')
+        self._collect_model.reset()
+
+    def _forward_collect(self, data: dict) -> dict:
+        r"""
+        Overview:
+            Forward function of collect mode.
+        Arguments:
+            - data (:obj:`dict`): Dict type data, including at least ['obs'].
+        Returns:
+            - output (:obj:`dict`): Dict type data, including at least inferred action according to input obs.
+        """
+        data_id = list(data.keys())
+        data = default_collate(list(data.values()))
+        if self._cuda:
+            data = to_device(data, self._device)
+        self._collect_model.eval()
+        with torch.no_grad():
+            (mu, sigma) = self._collect_model.forward(data, mode='compute_actor')['logit']
+            dist = Independent(Normal(mu, sigma), 1)
+            action = torch.tanh(dist.rsample())
+            output = {'logit': (mu, sigma), 'action': action}
+        if self._cuda:
+            output = to_device(output, 'cpu')
+        output = default_decollate(output)
+        return {i: d for i, d in zip(data_id, output)}
+
+    def _process_transition(self, obs: Any, model_output: dict, timestep: namedtuple) -> dict:
+        r"""
+        Overview:
+            Generate dict type transition data from inputs.
+        Arguments:
+            - obs (:obj:`Any`): Env observation
+            - model_output (:obj:`dict`): Output of collect model, including at least ['action']
+            - timestep (:obj:`namedtuple`): Output after env step, including at least ['obs', 'reward', 'done'] \
+                (here 'obs' indicates obs after env step, i.e. next_obs).
+        Return:
+            - transition (:obj:`Dict[str, Any]`): Dict type transition data.
+        """
+        transition = {
+            'obs': obs,
+            'next_obs': timestep.obs,
+            'action': model_output['action'],
+            'reward': timestep.reward,
+            'done': timestep.done,
+        }
+        return transition
+
+    def _get_train_sample(self, data: list) -> Union[None, List[Any]]:
+        return get_train_sample(data, self._unroll_len)
+
+    def _init_eval(self) -> None:
+        r"""
+        Overview:
+            Evaluate mode init method. Called by ``self.__init__``.
+            Init eval model. Unlike learn and collect model, eval model does not need noise.
+        """
+        self._eval_model = model_wrap(self._model, wrapper_name='base')
+        self._eval_model.reset()
+
+    def _forward_eval(self, data: dict) -> dict:
+        r"""
+        Overview:
+            Forward function for eval mode, similar to ``self._forward_collect``.
+        Arguments:
+            - data (:obj:`dict`): Dict type data, including at least ['obs'].
+        Returns:
+            - output (:obj:`dict`): Dict type data, including at least inferred action according to input obs.
+        """
+        data_id = list(data.keys())
+        data = default_collate(list(data.values()))
+        if self._cuda:
+            data = to_device(data, self._device)
+        self._eval_model.eval()
+        with torch.no_grad():
+            (mu, sigma) = self._eval_model.forward(data, mode='compute_actor')['logit']
+            action = torch.tanh(mu)  # deterministic_eval
+            output = {'action': action}
+        if self._cuda:
+            output = to_device(output, 'cpu')
+        output = default_decollate(output)
+        return {i: d for i, d in zip(data_id, output)}
+
+    def default_model(self) -> Tuple[str, List[str]]:
+        return 'qac', ['ding.model.template.qac']
+
+    def _monitor_vars_learn(self) -> List[str]:
+        r"""
+        Overview:
+            Return variables' name if variables are to used in monitor.
+        Returns:
+            - vars (:obj:`List[str]`): Variables' name list.
+        """
+        twin_critic = ['twin_critic_loss'] if self._twin_critic else []
+        if self._auto_alpha:
+            return super()._monitor_vars_learn() + [
+                'alpha_loss', 'policy_loss', 'critic_loss', 'cur_lr_q', 'cur_lr_p', 'target_q_value', 
+                'alpha', 'td_error', 'target_value', 'target_v', 'q_value_0', 'q_value_1', 'min_qf1_loss', 'min_qf2_loss'
+            ] + twin_critic
+        else:
+            return super()._monitor_vars_learn() + [
+                'policy_loss', 'critic_loss', 'cur_lr_q', 'cur_lr_p', 'target_q_value',
+                'alpha', 'td_error', 'target_value', 'target_v', 'q_value_0', 'q_value_1', 'min_qf1_loss', 'min_qf2_loss'
+            ] + twin_critic
 
     def _get_policy_actions(self, data: Dict, num_actions=10, epsilon: float=1e-6) -> List:
         
@@ -518,7 +659,6 @@ class CQLPolicy(SACPolicy):
         if self._twin_critic and not keep:
             new_q_value = torch.min(new_q_value[0], new_q_value[1])
         return new_q_value
-
 
 @POLICY_REGISTRY.register('cql_discrete')
 class CQLDiscretePolicy(DQNPolicy):

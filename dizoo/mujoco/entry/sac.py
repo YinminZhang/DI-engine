@@ -5,11 +5,31 @@ from ding.entry import serial_pipeline_offline, collect_demo_data, eval, serial_
 
 
 def offline_train(args):
-    from dizoo.mujoco.config.hopper_cql_default_config import main_config, create_config
-    main_config.exp_name = 'cql-train_d4rl-expert_fix-shape_clip50'
-    main_config.env.env_id='hopper-expert-v0'
-    main_config.policy.learn.clip = True
-    main_config.policy.learn.clip_value = 50
+    # from dizoo.mujoco.config.halfcheetah_cql_default_config import main_config, create_config
+    # main_config.policy.learn.critic_init=False
+    # main_config.exp_name = 'cql-train_d4rl-halfcheetah-expert-v0_fix-shape_version4-noweight-init'
+    # main_config.env.env_id='halfcheetah-expert-v0'
+
+    # from dizoo.mujoco.config.walker2d_cql_default_config import main_config, create_config
+    # main_config.policy.learn.critic_init=False
+    # main_config.exp_name = 'cql-train_d4rl-walker2d-expert-v0_fix-shape_version4-noweight-init'
+    # main_config.env.env_id='walker2d-expert-v0'
+
+    # from dizoo.mujoco.config.halfcheetah_cql_default_config import main_config, create_config
+    # main_config.policy.learn.critic_init=True
+    # main_config.exp_name = 'cql-train_d4rl-halfcheetah-expert-v0_fix-shape_version5-weight-init'
+    # main_config.env.env_id='halfcheetah-expert-v0'
+
+    # from dizoo.mujoco.config.walker2d_cql_default_config import main_config, create_config
+    # main_config.policy.learn.critic_init=True
+    # main_config.exp_name = 'cql-train_d4rl-walker2d-expert-v0_fix-shape_version5-weight-init'
+    # main_config.env.env_id='walker2d-expert-v0'
+    
+    from dizoo.mujoco.config.walker2d_cql_default_config import main_config, create_config
+    main_config.policy.learn.critic_init=True
+    main_config.exp_name = 'debug'
+    main_config.env.env_id='walker2d-expert-v0'
+
     config = deepcopy([main_config, create_config])
     serial_pipeline_offline(config, seed=args.seed)
 

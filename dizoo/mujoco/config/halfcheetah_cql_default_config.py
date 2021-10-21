@@ -1,22 +1,23 @@
 from easydict import EasyDict
 
-hopper_cql_default_config = dict(
+halfcheetah_cql_default_config = dict(
     env=dict(
-        env_id='Hopper-v3',
+        env_id='HalfCheetah-v3',
         norm_obs=dict(use_norm=False, ),
         norm_reward=dict(use_norm=False, ),
         collector_env_num=1,
         evaluator_env_num=8,
         use_act_scale=True,
         n_evaluator_episode=8,
-        stop_value=6000,
+        stop_value=12000,
     ),
     policy=dict(
         cuda=True,
         on_policy=False,
+        random_collect_size=10000,
         model=dict(
-            obs_shape=11,
-            action_shape=3,
+            obs_shape=17,
+            action_shape=6,
             twin_critic=True,
             actor_head_type='reparameterization',
             actor_head_hidden_size=256,
@@ -28,10 +29,11 @@ hopper_cql_default_config = dict(
             learning_rate_q=3e-4,
             learning_rate_policy=1e-4,
             learning_rate_alpha=1e-4,
-            ignore_done=False,
+            ignore_done=True,
             target_theta=0.005,
             discount_factor=0.99,
             alpha=0.2,
+            reparameterization=True,
             auto_alpha=False,
             with_lagrange=False,
             lagrange_thresh=-1.0,
@@ -47,18 +49,17 @@ hopper_cql_default_config = dict(
             n_sample=1,
             unroll_len=1,
             data_type='d4rl',
-            # data_path='./default_experiment/expert_iteration_200000.pkl',
         ),
         command=dict(),
         eval=dict(evaluator=dict(eval_freq=10000, )),
-        other=dict(replay_buffer=dict(replay_buffer_size=2000000, ), ),
+        other=dict(replay_buffer=dict(replay_buffer_size=1000000, ), ),
     ),
 )
 
-hopper_cql_default_config = EasyDict(hopper_cql_default_config)
-main_config = hopper_cql_default_config
+halfcheetah_cql_default_config = EasyDict(halfcheetah_cql_default_config)
+main_config = halfcheetah_cql_default_config
 
-hopper_cql_default_create_config = dict(
+halfcheetah_cql_default_create_config = dict(
     env=dict(
         type='mujoco',
         import_names=['dizoo.mujoco.envs.mujoco_env'],
@@ -70,5 +71,5 @@ hopper_cql_default_create_config = dict(
     ),
     replay_buffer=dict(type='naive', ),
 )
-hopper_cql_default_create_config = EasyDict(hopper_cql_default_create_config)
-create_config = hopper_cql_default_create_config
+halfcheetah_cql_default_create_config = EasyDict(halfcheetah_cql_default_create_config)
+create_config = halfcheetah_cql_default_create_config
