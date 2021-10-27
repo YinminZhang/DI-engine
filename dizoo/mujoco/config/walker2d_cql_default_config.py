@@ -41,8 +41,13 @@ walker2d_cql_default_config = dict(
             critic_init=True,
             learner=dict(
                 hook=dict(
-                    save_ckpt_after_iter=100000000000,
+                    # save_ckpt_after_iter=100,
+                    log_show_after_iter=10000,
                 ),
+            ),
+            lr_scheduler=dict(
+                flag=False,
+                T_max=2000000,
             ),
         ),
         collect=dict(

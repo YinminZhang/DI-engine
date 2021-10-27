@@ -6,6 +6,8 @@ import torch
 import torch.nn.functional as F
 from torch.distributions import Normal, Independent
 from torch.nn.utils import clip_grad_norm_
+from torch.optim.lr_scheduler import CosineAnnealingLR
+from torch.optim import SGD
 
 from ding.torch_utils import Adam, to_device
 from ding.rl_utils import v_1step_td_data, v_1step_td_error, get_train_sample, \
@@ -231,15 +233,33 @@ class CQLPolicy(Policy):
                 self._model.value_critic.parameters(),
                 lr=self._cfg.learn.learning_rate_value,
             )
-        self._optimizer_q = Adam(
-            self._model.critic.parameters(),
-            lr=self._cfg.learn.learning_rate_q,
-        )
-        self._optimizer_policy = Adam(
-            self._model.actor.parameters(),
-            lr=self._cfg.learn.learning_rate_policy,
-        )
-
+        if self._cfg.learn.optimizer.type=='adam':
+            self._optimizer_q = Adam(
+                self._model.critic.parameters(),
+                lr=self._cfg.learn.learning_rate_q,
+                weight_decay=self._cfg.learn.optimizer.weight_decay
+            )
+            self._optimizer_policy = Adam(
+                self._model.actor.parameters(),
+                lr=self._cfg.learn.learning_rate_policy,
+                weight_decay=self._cfg.learn.optimizer.weight_decay
+            )
+        elif self._cfg.learn.optimizer.type=='sgd':
+            self._optimizer_q = SGD(
+                self._model.critic.parameters(),
+                lr=self._cfg.learn.learning_rate_q,
+                momentum=self._cfg.learn.optimizer.momentum,
+                weight_decay=self._cfg.learn.optimizer.weight_decay
+            )
+            self._optimizer_policy = SGD(
+                self._model.actor.parameters(),
+                lr=self._cfg.learn.learning_rate_policy,
+                momentum=self._cfg.learn.optimizer.momentum,
+                weight_decay=self._cfg.learn.optimizer.weight_decay
+            )
+        if self._cfg.learn.lr_scheduler.flag==True:
+            self._lr_scheduler_q = CosineAnnealingLR(self._optimizer_q, T_max=self._cfg.learn.lr_scheduler.T_max, eta_min=self._cfg.learn.learning_rate_q*0.01)
+            self._lr_scheduler_policy = CosineAnnealingLR(self._optimizer_policy, T_max=self._cfg.learn.lr_scheduler.T_max, eta_min=self._cfg.learn.learning_rate_policy*0.01)
         # Algorithm config
         self._gamma = self._cfg.learn.discount_factor
         # Init auto alpha
@@ -291,14 +311,19 @@ class CQLPolicy(Policy):
         )
         if self._cuda:
             data = to_device(data, self._device)
-
+        if self._cfg.learn.lr_scheduler.flag==True:
+            if self._lr_scheduler_q.last_epoch<=self._lr_scheduler_q.T_max:
+                self._lr_scheduler_q.step()
+                self._lr_scheduler_policy.step()
+            else:
+                self._lr_scheduler_q.last_epoch+=1
+                self._lr_scheduler_policy.last_epoch+=1
         self._learn_model.train()
         self._target_model.train()
         obs = data.get('obs')
         next_obs = data.get('next_obs')
         reward = data.get('reward')
         done = data.get('done')
-
         # predict q value
         q_value = self._learn_model.forward(data, mode='compute_critic')['q_value']
 
@@ -473,8 +498,10 @@ class CQLPolicy(Policy):
         # target update
         self._target_model.update(self._learn_model.state_dict())
         return {
-            'cur_lr_q': self._optimizer_q.defaults['lr'],
-            'cur_lr_p': self._optimizer_policy.defaults['lr'],
+            'cur_lr_q': self._optimizer_q.param_groups[0]['lr'],
+            'cur_lr_p': self._optimizer_policy.param_groups[0]['lr'],
+            'q_fc_norm': self._get_fc_weight_norm(self._model.critic),
+            'policy_fc_norm': self._get_fc_weight_norm(self._model.actor),
             'priority': td_error_per_sample.abs().tolist(),
             'td_error': td_error_per_sample.detach().mean().item(),
             'alpha': self._alpha.item(),
@@ -487,13 +514,28 @@ class CQLPolicy(Policy):
             **info_dict,
             **loss_dict
         }
-
+    
+    def _get_fc_weight_norm(self, net):
+        with torch.no_grad():
+            return torch.sqrt(sum([torch.sum(m.weight.clone()**2) for m in net.modules() if isinstance(m, torch.nn.Linear)]))
+            
     def _state_dict_learn(self) -> Dict[str, Any]:
-        ret = {
-            'model': self._learn_model.state_dict(),
-            'optimizer_q': self._optimizer_q.state_dict(),
-            'optimizer_policy': self._optimizer_policy.state_dict(),
-        }
+        if self._cfg.learn.lr_scheduler.flag==True:
+            ret = {
+                'model': self._learn_model.state_dict(),
+                'target_model': self._target_model.state_dict(),
+                'optimizer_q': self._optimizer_q.state_dict(),
+                'optimizer_policy': self._optimizer_policy.state_dict(),
+                'lr_scheduler_q': self._lr_scheduler_q.state_dict(),
+                'lr_scheduler_policy': self._lr_scheduler_policy.state_dict(),
+            }
+        else:
+            ret = {
+                'model': self._learn_model.state_dict(),
+                'target_model': self._target_model.state_dict(),
+                'optimizer_q': self._optimizer_q.state_dict(),
+                'optimizer_policy': self._optimizer_policy.state_dict(),
+            }
         if self._value_network:
             ret.update({'optimizer_value': self._optimizer_value.state_dict()})
         if self._auto_alpha:
@@ -502,10 +544,15 @@ class CQLPolicy(Policy):
 
     def _load_state_dict_learn(self, state_dict: Dict[str, Any]) -> None:
         self._learn_model.load_state_dict(state_dict['model'])
+        self._target_model.load_state_dict(state_dict['target_model'])
         self._optimizer_q.load_state_dict(state_dict['optimizer_q'])
+        self._optimizer_policy.load_state_dict(state_dict['optimizer_policy'])
+        if self._cfg.learn.lr_scheduler.flag==True:
+            self._lr_scheduler_q.load_state_dict(state_dict['lr_scheduler_q'])
+            self._lr_scheduler_policy.load_state_dict(state_dict['lr_scheduler_policy'])
+        
         if self._value_network:
             self._optimizer_value.load_state_dict(state_dict['optimizer_value'])
-        self._optimizer_policy.load_state_dict(state_dict['optimizer_policy'])
         if self._auto_alpha:
             self._alpha_optim.load_state_dict(state_dict['optimizer_alpha'])
 
@@ -629,7 +676,7 @@ class CQLPolicy(Policy):
             ] + twin_critic
         else:
             return super()._monitor_vars_learn() + [
-                'policy_loss', 'critic_loss', 'cur_lr_q', 'cur_lr_p', 'target_q_value',
+                'policy_loss', 'critic_loss', 'cur_lr_q', 'cur_lr_p', 'target_q_value', 'q_fc_norm', 'policy_fc_norm',
                 'alpha', 'td_error', 'target_value', 'target_v', 'q_value_0', 'q_value_1', 'min_qf1_loss', 'min_qf2_loss'
             ] + twin_critic
 

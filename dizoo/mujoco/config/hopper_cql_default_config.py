@@ -39,15 +39,20 @@ hopper_cql_default_config = dict(
             critic_init=True,
             learner=dict(
                 hook=dict(
-                    save_ckpt_after_iter=100000000000,
+                    # save_ckpt_after_iter=100,
+                    log_show_after_iter=10000,
                 ),
+            ),
+            lr_scheduler=dict(
+                flag=False,
+                T_max=1000000,
             ),
         ),
         collect=dict(
             n_sample=1,
             unroll_len=1,
-            data_type='d4rl',
-            # data_path='./default_experiment/expert_iteration_200000.pkl',
+            data_type='hdf5',
+            data_path='./default_experiment/expert_iteration_200000.pkl',
         ),
         command=dict(),
         eval=dict(evaluator=dict(eval_freq=10000, )),

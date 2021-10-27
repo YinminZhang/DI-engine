@@ -1,7 +1,6 @@
 from typing import Dict
 import gym
 import numpy as np
-import d4rl
 from ding.envs import ObsNormEnv, RewardNormEnv
 
 
