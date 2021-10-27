@@ -28,6 +28,7 @@ from .sql import SQLPolicy
 from .dqfd import DQFDPolicy
 from .d4pg import D4PGPolicy
 from .cql import CQLPolicy, CQLDiscretePolicy
+from .qrdqn_bc import QRDQNBCPolicy
 
 
 class EpsCommandModePolicy(CommandModePolicy):
@@ -175,6 +176,11 @@ class CQLCommandModePolicy(CQLPolicy, DummyCommandModePolicy):
 
 @POLICY_REGISTRY.register('cql_discrete_command')
 class CQLDiscreteCommandModePolicy(CQLDiscretePolicy, EpsCommandModePolicy):
+    pass
+
+
+@POLICY_REGISTRY.register('qrdqn_bc_command')
+class QRDQNBCCommandModePolicy(QRDQNBCPolicy, EpsCommandModePolicy):
     pass
 
 

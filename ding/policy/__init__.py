@@ -16,6 +16,7 @@ from .impala import IMPALAPolicy
 from .r2d2 import R2D2Policy
 from .ppg import PPGPolicy
 from .sqn import SQNPolicy
+from .qrdqn_bc import QRDQNBCPolicy
 
 from .qmix import QMIXPolicy
 from .wqmix import WQMIXPolicy
