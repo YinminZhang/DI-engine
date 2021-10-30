@@ -6,7 +6,7 @@ import torch
 import torch.nn.functional as F
 from torch.distributions import Normal, Independent
 from torch.nn.utils import clip_grad_norm_
-from torch.optim.lr_scheduler import CosineAnnealingLR
+from torch.optim.lr_scheduler import CosineAnnealingLR, MultiStepLR
 from torch.optim import SGD
 
 from ding.torch_utils import Adam, to_device
@@ -258,8 +258,12 @@ class CQLPolicy(Policy):
                 weight_decay=self._cfg.learn.optimizer.weight_decay
             )
         if self._cfg.learn.lr_scheduler.flag==True:
-            self._lr_scheduler_q = CosineAnnealingLR(self._optimizer_q, T_max=self._cfg.learn.lr_scheduler.T_max, eta_min=self._cfg.learn.learning_rate_q*0.01)
-            self._lr_scheduler_policy = CosineAnnealingLR(self._optimizer_policy, T_max=self._cfg.learn.lr_scheduler.T_max, eta_min=self._cfg.learn.learning_rate_policy*0.01)
+            if self._cfg.learn.lr_scheduler.type=='Cosine':
+                self._lr_scheduler_q = CosineAnnealingLR(self._optimizer_q, T_max=self._cfg.learn.lr_scheduler.T_max, eta_min=self._cfg.learn.learning_rate_q*0.01)
+                self._lr_scheduler_policy = CosineAnnealingLR(self._optimizer_policy, T_max=self._cfg.learn.lr_scheduler.T_max, eta_min=self._cfg.learn.learning_rate_policy*0.01)
+            elif self._cfg.learn.lr_scheduler.type=='MultiStep':
+                self._lr_scheduler_q = MultiStepLR(self._optimizer_q, milestones=self._cfg.learn.lr_scheduler.milestones, gamma=self._cfg.learn.lr_scheduler.gamma)
+                self._lr_scheduler_policy = MultiStepLR(self._optimizer_policy, milestones=self._cfg.learn.lr_scheduler.milestones, gamma=self._cfg.learn.lr_scheduler.gamma)
         # Algorithm config
         self._gamma = self._cfg.learn.discount_factor
         # Init auto alpha
@@ -312,7 +316,7 @@ class CQLPolicy(Policy):
         if self._cuda:
             data = to_device(data, self._device)
         if self._cfg.learn.lr_scheduler.flag==True:
-            if self._lr_scheduler_q.last_epoch<=self._lr_scheduler_q.T_max:
+            if self._lr_scheduler_q.last_epoch<=self._cfg.learn.lr_scheduler.T_max:
                 self._lr_scheduler_q.step()
                 self._lr_scheduler_policy.step()
             else:
