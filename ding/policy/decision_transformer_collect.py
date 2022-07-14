@@ -25,7 +25,7 @@ import csv
 from .dqn import DQNPolicy
 
 
-@POLICY_REGISTRY.register('dt')
+@POLICY_REGISTRY.register('dt_collect')
 class DTPolicy(DQNPolicy):
     r"""
     Overview:

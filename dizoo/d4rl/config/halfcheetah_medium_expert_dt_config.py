@@ -12,10 +12,10 @@ halfcheetah_dt_config = dict(
         evaluator_env_num=8,
         use_act_scale=True,
         n_evaluator_episode=8,
-        stop_value=6000,
+        stop_value=15000,
     ),
     policy=dict(
-        stop_value=6000,
+        stop_value=15000,
         cuda=True,
         env_name='HalfCheetah-v3',
         rtg_target=6000, # max target return to go

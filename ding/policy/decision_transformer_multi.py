@@ -1,7 +1,6 @@
 """The code is adapted from https://github.com/nikhilbarhate99/min-decision-transformer
 """
 
-from cmath import e
 from typing import List, Dict, Any, Tuple, Union
 from collections import namedtuple
 from torch.distributions import Normal, Independent
@@ -25,7 +24,7 @@ import csv
 from .dqn import DQNPolicy
 
 
-@POLICY_REGISTRY.register('dt')
+@POLICY_REGISTRY.register('dt_multi')
 class DTPolicy(DQNPolicy):
     r"""
     Overview:
@@ -120,7 +119,7 @@ class DTPolicy(DQNPolicy):
         self.start_time_str = self.start_time.strftime("%y-%m-%d-%H-%M-%S")
 
         # prefix = "dt_" + env_d4rl_name
-        self.prefix = "dt_" + self.env_name if isinstance(self.env_name, str) else "dt_" + '-'.join(self.env_name)
+        self.prefix = "dt_" + self.env_name
 
         save_model_name = self.prefix + "_model_" + self.start_time_str + ".pt"
         self.save_model_path = os.path.join(self.log_dir, save_model_name)
@@ -144,10 +143,7 @@ class DTPolicy(DQNPolicy):
         logging.info("model save path: " + self.save_model_path)
         logging.info("log csv save path: " + log_csv_path)
 
-        if isinstance(self.env_name, list):
-            self._env = [gym.make(env_name) for env_name in self.env_name]
-        else:
-            self._env = gym.make(self.env_name)
+        self._env = gym.make(self.env_name)
 
         self.state_dim = self._cfg.model.state_dim
         self.act_dim = self._cfg.model.act_dim
@@ -186,14 +182,6 @@ class DTPolicy(DQNPolicy):
         traj_mask = traj_mask.to(self.device)  # B x T
         action_target = torch.clone(actions).detach().to(self.device)
 
-        # import ipdb; ipdb.set_trace()
-        if isinstance(self._env, list):
-            idx = [e.observation_space.shape for e in self._env].index((states.shape[-1],))
-            env = self._env[idx]
-            act_dim = self.act_dim[idx]
-            state_dim = self.state_dim[idx]
-        else:
-            act_dim = self.act_dim
         # The shape of `returns_to_go` may differ with different dataset (B x T or B x T x 1),
         # and we need a 3-dim tensor
         if len(returns_to_go.shape) == 2:
@@ -201,7 +189,7 @@ class DTPolicy(DQNPolicy):
 
         # if discrete
         if not self._cfg.model.continuous:
-            actions = one_hot(actions.squeeze(-1), num=act_dim)
+            actions = one_hot(actions.squeeze(-1), num=self.act_dim)
 
         state_preds, action_preds, return_preds = self._learn_model.forward(
             timesteps=timesteps, states=states, actions=actions, returns_to_go=returns_to_go
@@ -210,10 +198,10 @@ class DTPolicy(DQNPolicy):
         traj_mask = traj_mask.view(-1, )
 
         # only consider non padded elements
-        action_preds = action_preds.view(-1, act_dim)[traj_mask > 0]
+        action_preds = action_preds.view(-1, self.act_dim)[traj_mask > 0]
 
         if self._cfg.model.continuous:
-            action_target = action_target.view(-1, act_dim)[traj_mask > 0]
+            action_target = action_target.view(-1, self.act_dim)[traj_mask > 0]
         else:
             action_target = action_target.view(-1)[traj_mask > 0]
 
@@ -234,17 +222,6 @@ class DTPolicy(DQNPolicy):
         }
 
     def evaluate_on_env(self, state_mean=None, state_std=None, render=False):
-        
-        # import ipdb; ipdb.set_trace()
-        if isinstance(self._env, list):
-            idx = [e.observation_space.shape for e in self._env].index(state_mean.shape)
-            env = self._env[idx]
-            act_dim = self.act_dim[idx]
-            state_dim = self.state_dim[idx]
-        else:
-            env = self._env
-            act_dim = self.act_dim
-            state_dim = self.state_dim
 
         eval_batch_size = 1  # required for forward pass
 
@@ -256,12 +233,12 @@ class DTPolicy(DQNPolicy):
         # act_dim = env.action_space.shape[0]
 
         if state_mean is None:
-            self.state_mean = torch.zeros((state_dim, )).to(self.device)
+            self.state_mean = torch.zeros((self.state_dim, )).to(self.device)
         else:
             self.state_mean = torch.from_numpy(state_mean).to(self.device)
 
         if state_std is None:
-            self.state_std = torch.ones((state_dim, )).to(self.device)
+            self.state_std = torch.ones((self.state_dim, )).to(self.device)
         else:
             self.state_std = torch.from_numpy(state_std).to(self.device)
 
@@ -279,7 +256,7 @@ class DTPolicy(DQNPolicy):
                 # zeros place holders
                 # continuous action
                 actions = torch.zeros(
-                    (eval_batch_size, self.max_eval_ep_len, act_dim), dtype=torch.float32, device=self.device
+                    (eval_batch_size, self.max_eval_ep_len, self.act_dim), dtype=torch.float32, device=self.device
                 )
 
                 # discrete action # TODO
@@ -287,14 +264,14 @@ class DTPolicy(DQNPolicy):
                 # dtype=torch.long, device=self.device)
 
                 states = torch.zeros(
-                    (eval_batch_size, self.max_eval_ep_len, state_dim), dtype=torch.float32, device=self.device
+                    (eval_batch_size, self.max_eval_ep_len, self.state_dim), dtype=torch.float32, device=self.device
                 )
                 rewards_to_go = torch.zeros(
                     (eval_batch_size, self.max_eval_ep_len, 1), dtype=torch.float32, device=self.device
                 )
 
                 # init episode
-                running_state = env.reset()
+                running_state = self._env.reset()
                 running_reward = 0
                 running_rtg = self.rtg_target / self.rtg_scale
 
@@ -336,7 +313,7 @@ class DTPolicy(DQNPolicy):
                     # if discrete
                     if not self._cfg.model.continuous:
                         act = torch.argmax(act)
-                    running_state, running_reward, done, _ = env.step(act.cpu().numpy())
+                    running_state, running_reward, done, _ = self._env.step(act.cpu().numpy())
 
                     # add action in placeholder
                     actions[0, t] = act
@@ -344,7 +321,7 @@ class DTPolicy(DQNPolicy):
                     total_reward += running_reward
 
                     if render:
-                        env.render()
+                        self._env.render()
                     if done:
                         break
 
@@ -358,12 +335,7 @@ class DTPolicy(DQNPolicy):
 
         eval_avg_reward = results['eval/avg_reward']
         eval_avg_ep_len = results['eval/avg_ep_len']
-        if isinstance(self._env, list):
-            idx = [e.observation_space.shape for e in self._env].index(state_mean.shape)
-            env_name = self.env_name[idx]
-        else:
-            env_name = self.env_name
-        eval_d4rl_score = self.get_d4rl_normalized_score(results['eval/avg_reward'], env_name) * 100
+        eval_d4rl_score = self.get_d4rl_normalized_score(results['eval/avg_reward'], self.env_name) * 100
 
         time_elapsed = str(datetime.now().replace(microsecond=0) - self.start_time)
 
@@ -445,7 +417,7 @@ class DTPolicy(DQNPolicy):
             - necessary: ``action``
             - optional: ``logit``
         """
-        # import ipdb; ipdb.set_trace()
+        import ipdb; ipdb.set_trace()
         data_id = list(data.keys())
         data = default_collate(list(data.values()))
 

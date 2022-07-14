@@ -10,7 +10,7 @@ import d4rl
 def download_d4rl_data():
 	datasets = []
 
-	data_dir = '/mnt/lustre/wangzilin/d4rl_data'
+	data_dir = '/mnt/lustre/zhangyinmin/dataset/d4rl_data'
 
 	print(data_dir)
 
@@ -64,4 +64,7 @@ def download_d4rl_data():
 
 
 if __name__ == "__main__":
+	# import ipdb; ipdb.set_trace()
+	from d4rl import set_dataset_path
+	set_dataset_path('/mnt/lustre/zhangyinmin/dataset/d4rl')
 	download_d4rl_data()

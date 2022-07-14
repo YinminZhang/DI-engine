@@ -1,0 +1,93 @@
+Looking in indexes: http://pypi.opencloud.sensetime.com/repository/pypi-proxy/simple/
+Processing /mnt/lustre/zhangyinmin/research/jaxlib-0.3.14-cp38-none-manylinux2014_x86_64.whl
+Collecting tensorflow-gpu
+  Downloading http://pypi.opencloud.sensetime.com/repository/pypi-proxy/packages/tensorflow-gpu/2.9.1/tensorflow_gpu-2.9.1-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (511.7 MB)
+Collecting blosc
+  Downloading http://pypi.opencloud.sensetime.com/repository/pypi-proxy/packages/blosc/1.10.6/blosc-1.10.6-cp38-cp38-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_12_x86_64.manylinux2010_x86_64.whl (2.6 MB)
+Collecting termcolor>=1.1.0
+  Downloading http://pypi.opencloud.sensetime.com/repository/pypi-proxy/packages/termcolor/1.1.0/termcolor-1.1.0.tar.gz (3.9 kB)
+  Preparing metadata (setup.py): started
+  Preparing metadata (setup.py): finished with status 'done'
+Requirement already satisfied: h5py>=2.9.0 in /opt/conda/lib/python3.8/site-packages (from tensorflow-gpu) (3.6.0)
+Collecting tensorboard<2.10,>=2.9
+  Downloading http://pypi.opencloud.sensetime.com/repository/pypi-proxy/packages/tensorboard/2.9.1/tensorboard-2.9.1-py3-none-any.whl (5.8 MB)
+Collecting tensorflow-io-gcs-filesystem>=0.23.1
+  Downloading http://pypi.opencloud.sensetime.com/repository/pypi-proxy/packages/tensorflow-io-gcs-filesystem/0.26.0/tensorflow_io_gcs_filesystem-0.26.0-cp38-cp38-manylinux_2_12_x86_64.manylinux2010_x86_64.whl (2.4 MB)
+Requirement already satisfied: packaging in /opt/conda/lib/python3.8/site-packages (from tensorflow-gpu) (21.3)
+Collecting numpy>=1.20
+  Downloading http://pypi.opencloud.sensetime.com/repository/pypi-proxy/packages/numpy/1.23.0/numpy-1.23.0-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (17.1 MB)
+Collecting keras<2.10.0,>=2.9.0rc0
+  Downloading http://pypi.opencloud.sensetime.com/repository/pypi-proxy/packages/keras/2.9.0/keras-2.9.0-py2.py3-none-any.whl (1.6 MB)
+Requirement already satisfied: protobuf<3.20,>=3.9.2 in /opt/conda/lib/python3.8/site-packages (from tensorflow-gpu) (3.19.1)
+Collecting tensorflow-estimator<2.10.0,>=2.9.0rc0
+  Downloading http://pypi.opencloud.sensetime.com/repository/pypi-proxy/packages/tensorflow-estimator/2.9.0/tensorflow_estimator-2.9.0-py2.py3-none-any.whl (438 kB)
+Requirement already satisfied: six>=1.12.0 in /opt/conda/lib/python3.8/site-packages (from tensorflow-gpu) (1.15.0)
+Collecting absl-py>=1.0.0
+  Downloading http://pypi.opencloud.sensetime.com/repository/pypi-proxy/packages/absl-py/1.1.0/absl_py-1.1.0-py3-none-any.whl (123 kB)
+Collecting grpcio<2.0,>=1.24.3
+  Downloading http://pypi.opencloud.sensetime.com/repository/pypi-proxy/packages/grpcio/1.47.0/grpcio-1.47.0-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (4.5 MB)
+Collecting astunparse>=1.6.0
+  Downloading http://pypi.opencloud.sensetime.com/repository/pypi-proxy/packages/astunparse/1.6.3/astunparse-1.6.3-py2.py3-none-any.whl (12 kB)
+Requirement already satisfied: typing-extensions>=3.6.6 in /opt/conda/lib/python3.8/site-packages (from tensorflow-gpu) (4.3.0)
+Requirement already satisfied: wrapt>=1.11.0 in /opt/conda/lib/python3.8/site-packages (from tensorflow-gpu) (1.14.1)
+Collecting keras-preprocessing>=1.1.1
+  Downloading http://pypi.opencloud.sensetime.com/repository/pypi-proxy/packages/keras-preprocessing/1.1.2/Keras_Preprocessing-1.1.2-py2.py3-none-any.whl (42 kB)
+Collecting flatbuffers<2,>=1.12
+  Downloading http://pypi.opencloud.sensetime.com/repository/pypi-proxy/packages/flatbuffers/1.12/flatbuffers-1.12-py2.py3-none-any.whl (15 kB)
+Collecting gast<=0.4.0,>=0.2.1
+  Downloading http://pypi.opencloud.sensetime.com/repository/pypi-proxy/packages/gast/0.4.0/gast-0.4.0-py3-none-any.whl (9.8 kB)
+Collecting libclang>=13.0.0
+  Downloading http://pypi.opencloud.sensetime.com/repository/pypi-proxy/packages/libclang/14.0.1/libclang-14.0.1-py2.py3-none-manylinux1_x86_64.whl (14.5 MB)
+Collecting opt-einsum>=2.3.2
+  Downloading http://pypi.opencloud.sensetime.com/repository/pypi-proxy/packages/opt-einsum/3.3.0/opt_einsum-3.3.0-py3-none-any.whl (65 kB)
+Requirement already satisfied: setuptools in /opt/conda/lib/python3.8/site-packages (from tensorflow-gpu) (50.3.1.post20201107)
+Collecting google-pasta>=0.1.1
+  Downloading http://pypi.opencloud.sensetime.com/repository/pypi-proxy/packages/google-pasta/0.2.0/google_pasta-0.2.0-py3-none-any.whl (57 kB)
+Requirement already satisfied: scipy>=1.5 in /opt/conda/lib/python3.8/site-packages (from jaxlib==0.3.14) (1.7.3)
+Requirement already satisfied: wheel<1.0,>=0.23.0 in /opt/conda/lib/python3.8/site-packages (from astunparse>=1.6.0->tensorflow-gpu) (0.35.1)
+Collecting numpy>=1.20
+  Downloading http://pypi.opencloud.sensetime.com/repository/pypi-proxy/packages/numpy/1.22.4/numpy-1.22.4-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (16.9 MB)
+Collecting markdown>=2.6.8
+  Downloading http://pypi.opencloud.sensetime.com/repository/pypi-proxy/packages/markdown/3.3.7/Markdown-3.3.7-py3-none-any.whl (97 kB)
+Collecting google-auth<3,>=1.6.3
+  Downloading http://pypi.opencloud.sensetime.com/repository/pypi-proxy/packages/google-auth/2.9.0/google_auth-2.9.0-py2.py3-none-any.whl (167 kB)
+Collecting tensorboard-data-server<0.7.0,>=0.6.0
+  Downloading http://pypi.opencloud.sensetime.com/repository/pypi-proxy/packages/tensorboard-data-server/0.6.1/tensorboard_data_server-0.6.1-py3-none-manylinux2010_x86_64.whl (4.9 MB)
+Collecting google-auth-oauthlib<0.5,>=0.4.1
+  Downloading http://pypi.opencloud.sensetime.com/repository/pypi-proxy/packages/google-auth-oauthlib/0.4.6/google_auth_oauthlib-0.4.6-py2.py3-none-any.whl (18 kB)
+Requirement already satisfied: requests<3,>=2.21.0 in /opt/conda/lib/python3.8/site-packages (from tensorboard<2.10,>=2.9->tensorflow-gpu) (2.27.1)
+Requirement already satisfied: werkzeug>=1.0.1 in /opt/conda/lib/python3.8/site-packages (from tensorboard<2.10,>=2.9->tensorflow-gpu) (1.0.1)
+Collecting tensorboard-plugin-wit>=1.6.0
+  Downloading http://pypi.opencloud.sensetime.com/repository/pypi-proxy/packages/tensorboard-plugin-wit/1.8.1/tensorboard_plugin_wit-1.8.1-py3-none-any.whl (781 kB)
+Requirement already satisfied: pyparsing!=3.0.5,>=2.0.2 in /opt/conda/lib/python3.8/site-packages (from packaging->tensorflow-gpu) (3.0.6)
+Collecting cachetools<6.0,>=2.0.0
+  Downloading http://pypi.opencloud.sensetime.com/repository/pypi-proxy/packages/cachetools/5.2.0/cachetools-5.2.0-py3-none-any.whl (9.3 kB)
+Collecting rsa<5,>=3.1.4
+  Downloading http://pypi.opencloud.sensetime.com/repository/pypi-proxy/packages/rsa/4.8/rsa-4.8-py3-none-any.whl (39 kB)
+Collecting pyasn1-modules>=0.2.1
+  Downloading http://pypi.opencloud.sensetime.com/repository/pypi-proxy/packages/pyasn1-modules/0.2.8/pyasn1_modules-0.2.8-py2.py3-none-any.whl (155 kB)
+Collecting requests-oauthlib>=0.7.0
+  Downloading http://pypi.opencloud.sensetime.com/repository/pypi-proxy/packages/requests-oauthlib/1.3.1/requests_oauthlib-1.3.1-py2.py3-none-any.whl (23 kB)
+Collecting importlib-metadata>=4.4
+  Downloading http://pypi.opencloud.sensetime.com/repository/pypi-proxy/packages/importlib-metadata/4.12.0/importlib_metadata-4.12.0-py3-none-any.whl (21 kB)
+Requirement already satisfied: urllib3<1.27,>=1.21.1 in /opt/conda/lib/python3.8/site-packages (from requests<3,>=2.21.0->tensorboard<2.10,>=2.9->tensorflow-gpu) (1.26.8)
+Requirement already satisfied: charset-normalizer~=2.0.0 in /opt/conda/lib/python3.8/site-packages (from requests<3,>=2.21.0->tensorboard<2.10,>=2.9->tensorflow-gpu) (2.0.10)
+Requirement already satisfied: certifi>=2017.4.17 in /opt/conda/lib/python3.8/site-packages (from requests<3,>=2.21.0->tensorboard<2.10,>=2.9->tensorflow-gpu) (2020.12.5)
+Requirement already satisfied: idna<4,>=2.5 in /opt/conda/lib/python3.8/site-packages (from requests<3,>=2.21.0->tensorboard<2.10,>=2.9->tensorflow-gpu) (2.10)
+Requirement already satisfied: zipp>=0.5 in /opt/conda/lib/python3.8/site-packages (from importlib-metadata>=4.4->markdown>=2.6.8->tensorboard<2.10,>=2.9->tensorflow-gpu) (3.7.0)
+Collecting pyasn1<0.5.0,>=0.4.6
+  Downloading http://pypi.opencloud.sensetime.com/repository/pypi-proxy/packages/pyasn1/0.4.8/pyasn1-0.4.8-py2.py3-none-any.whl (77 kB)
+Collecting oauthlib>=3.0.0
+  Downloading http://pypi.opencloud.sensetime.com/repository/pypi-proxy/packages/oauthlib/3.2.0/oauthlib-3.2.0-py3-none-any.whl (151 kB)
+Building wheels for collected packages: termcolor
+  Building wheel for termcolor (setup.py): started
+  Building wheel for termcolor (setup.py): finished with status 'done'
+  Created wheel for termcolor: filename=termcolor-1.1.0-py3-none-any.whl size=4830 sha256=fba7b8502723d77a899fbeb9a1385368764d4ec36e9c51f36a3c8997ae3ad777
+  Stored in directory: /root/.cache/pip/wheels/6c/92/a9/a86f748444bb106f6f74f14ac5a831e6cbf5752fdca9aa64b5
+Successfully built termcolor
+Installing collected packages: pyasn1, rsa, pyasn1-modules, oauthlib, cachetools, requests-oauthlib, importlib-metadata, google-auth, tensorboard-plugin-wit, tensorboard-data-server, numpy, markdown, grpcio, google-auth-oauthlib, absl-py, termcolor, tensorflow-io-gcs-filesystem, tensorflow-estimator, tensorboard, opt-einsum, libclang, keras-preprocessing, keras, google-pasta, gast, flatbuffers, astunparse, tensorflow-gpu, jaxlib, blosc
+  Attempting uninstall: numpy
+    Found existing installation: numpy 1.19.2
+    Uninstalling numpy-1.19.2:
+      Successfully uninstalled numpy-1.19.2
+Successfully installed absl-py-1.1.0 astunparse-1.6.3 blosc-1.10.6 cachetools-5.2.0 flatbuffers-1.12 gast-0.4.0 google-auth-2.9.0 google-auth-oauthlib-0.4.6 google-pasta-0.2.0 grpcio-1.47.0 importlib-metadata-4.12.0 jaxlib-0.3.14 keras-2.9.0 keras-preprocessing-1.1.2 libclang-14.0.1 markdown-3.3.7 numpy-1.22.4 oauthlib-3.2.0 opt-einsum-3.3.0 pyasn1-0.4.8 pyasn1-modules-0.2.8 requests-oauthlib-1.3.1 rsa-4.8 tensorboard-2.9.1 tensorboard-data-server-0.6.1 tensorboard-plugin-wit-1.8.1 tensorflow-estimator-2.9.0 tensorflow-gpu-2.9.1 tensorflow-io-gcs-filesystem-0.26.0 termcolor-1.1.0
