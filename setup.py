@@ -50,7 +50,7 @@ setup(
         'requests>=2.25.1',
         'six',
         'gym==0.20.0',  # pypy incompatible
-        'torch>=1.1.0,<1.12.0',  # PyTorch 1.10.0 is available, if some errors, you need to do something like https://github.com/opendilab/DI-engine/discussions/81
+        'torch>=1.1.0',  # PyTorch 1.10.0 is available, if some errors, you need to do something like https://github.com/opendilab/DI-engine/discussions/81
         'pyyaml<6.0',
         'easydict==1.9',
         'protobuf<=3.20.1',

@@ -104,7 +104,7 @@ def serial_pipeline_dt(
                     break
         if stop:
             break
-        if total_update_times >= 1e5:
+        if total_update_times >= max_train_iter:
             break
     learner.call_hook('after_run')
     return policy, stop

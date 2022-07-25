@@ -52,13 +52,15 @@ class DecisionTransformer(nn.Module):
             n_heads: int,
             drop_p: float,
             max_timestep: int = 4096,
-            continuous: bool = True
+            continuous: bool = True,
+            state_goal: bool = False,
     ) -> None:
         super().__init__()
         self.continuous = continuous
         self.state_dim = state_dim
         self.act_dim = act_dim
         self.h_dim = h_dim
+        self.state_goal = state_goal
 
         # transformer blocks
         # we will serially arrange `return`, `state` and `action`, so here the input_seq_len is 3 * context_len
@@ -69,7 +71,10 @@ class DecisionTransformer(nn.Module):
         # projection heads (project to embedding)
         self.embed_ln = nn.LayerNorm(h_dim)
         self.embed_timestep = nn.Embedding(max_timestep, h_dim)
-        self.embed_rtg = torch.nn.Linear(1, h_dim)
+        if state_goal:
+            self.embed_rtg = torch.nn.Linear(state_dim, h_dim)
+        else:
+            self.embed_rtg = torch.nn.Linear(1, h_dim)
         self.embed_state = torch.nn.Linear(state_dim, h_dim)
 
         if self.continuous:
@@ -98,7 +103,6 @@ class DecisionTransformer(nn.Module):
         state_embeddings = self.embed_state(states) + time_embeddings
         action_embeddings = self.embed_action(actions) + time_embeddings
         returns_embeddings = self.embed_rtg(returns_to_go) + time_embeddings
-
         # stack rtg, states and actions and reshape sequence as
         # (r1, s1, a1, r2, s2, a2 ...)
         # after stack shape: (B, 3, context_len/T, h_dim)
@@ -115,7 +119,7 @@ class DecisionTransformer(nn.Module):
         # h[:, 1, t] is conditioned on r_0, s_0, a_0 ... r_t, s_t
         # h[:, 2, t] is conditioned on r_0, s_0, a_0 ... r_t, s_t, a_t
         h = h.reshape(B, T, 3, self.h_dim)
-
+        
         # get predictions
         return_preds = self.predict_rtg(h[..., 2, :])  # predict next rtg given r, s, a
         state_preds = self.predict_state(h[..., 2, :])  # predict next state given r, s, a

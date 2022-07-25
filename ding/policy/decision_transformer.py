@@ -2,6 +2,7 @@
 """
 
 from cmath import e
+from random import random
 from typing import List, Dict, Any, Tuple, Union
 from collections import namedtuple
 from torch.distributions import Normal, Independent
@@ -164,6 +165,9 @@ class DTPolicy(DQNPolicy):
         self._with_decrement_return = self._cfg.learn.get('with_decrement_return', True)
         self.discrete = self._cfg.get('discrete', False)
         self.discrete_bin = self._cfg.get('discrete_bin', 0)
+        self.inverse_discrete_bin = self._cfg.get('inverse_discrete_bin', False)
+        if self._cfg.model.get('state_goal', False):
+            self.ratio = self._cfg.get('expert_state_ratio', 1.0)
 
     def _forward_learn(self, data: list) -> Dict[str, Any]:
         r"""
@@ -186,6 +190,10 @@ class DTPolicy(DQNPolicy):
         traj_mask = traj_mask.to(self.device)  # B x T
         action_target = torch.clone(actions).detach().to(self.device)
 
+        if self.inverse_discrete_bin and self.discrete:
+            # returns_to_go = self._cfg.discrete_bin - returns_to_go
+            returns_to_go = ((returns_to_go) - (self._cfg.discrete_bin//2)) % self._cfg.discrete_bin
+
         # import ipdb; ipdb.set_trace()
         if isinstance(self._env, list):
             idx = [e.observation_space.shape for e in self._env].index((states.shape[-1],))
@@ -194,6 +202,7 @@ class DTPolicy(DQNPolicy):
             state_dim = self.state_dim[idx]
         else:
             act_dim = self.act_dim
+            state_dim = self.state_dim
         # The shape of `returns_to_go` may differ with different dataset (B x T or B x T x 1),
         # and we need a 3-dim tensor
         if len(returns_to_go.shape) == 2:
@@ -203,8 +212,26 @@ class DTPolicy(DQNPolicy):
         if not self._cfg.model.continuous:
             actions = one_hot(actions.squeeze(-1), num=act_dim)
 
+        if self._cfg.get('random_mask_ratio', 0.0):
+            # import ipdb; ipdb.set_trace()
+            B, T, C = actions.shape
+            states_inputs = torch.clone(states).detach().to(self.device)
+            actions_inputs = torch.clone(actions).detach().to(self.device)
+            returns_to_go_inputs = torch.clone(returns_to_go).detach().to(self.device)
+            index = np.random.choice(T*3, int(self._cfg.random_mask_ratio*T*3), replace=False)
+            index_return = index[index<T]
+            index_states = index[(index<2*T) & (index>T)] - T
+            index_action = index[index>2*T] - 2 * T
+            actions_inputs[:, index_action, :] = torch.rand_like(actions_inputs[:, index_action, :]).to(self.device)
+            states_inputs[:, index_states, :] = torch.rand_like(states_inputs[:, index_states, :]).to(self.device)
+            returns_to_go_inputs[:, index_return, :] = torch.rand_like(returns_to_go_inputs[:, index_return, :]).to(self.device)
+        else:
+            states_inputs = torch.clone(states).detach().to(self.device)
+            actions_inputs = torch.clone(actions).detach().to(self.device)
+            returns_to_go_inputs = torch.clone(returns_to_go).detach().to(self.device)
+
         state_preds, action_preds, return_preds = self._learn_model.forward(
-            timesteps=timesteps, states=states, actions=actions, returns_to_go=returns_to_go
+            timesteps=timesteps, states=states_inputs, actions=actions_inputs, returns_to_go=returns_to_go_inputs
         )
 
         traj_mask = traj_mask.view(-1, )
@@ -222,16 +249,46 @@ class DTPolicy(DQNPolicy):
         else:
             action_loss = F.cross_entropy(action_preds, action_target)
 
+        if self._cfg.get('auxiliary_loss', False):
+            # import ipdb; ipdb.set_trace()
+            B, T, C = state_preds.shape
+            # only consider non padded elements
+            state_preds = state_preds.view(-1, state_dim)[traj_mask > 0]
+            return_preds = return_preds.view(-1, 1)[traj_mask > 0]
+            states_target = torch.clone(states).detach().to(self.device).view(-1, state_dim)[traj_mask > 0]
+            returns_to_go_target = torch.clone(returns_to_go).detach().to(self.device).view(-1, 1)[traj_mask > 0]
+
+            states_loss = F.mse_loss(state_preds.reshape(B, T, C)[:, :-1, :], 
+                                    states_target.reshape(B, T, C)[:, 1:, :])
+            returns_to_go_loss = F.mse_loss(return_preds.reshape(B, T, 1)[:, :-1, :], 
+                                            returns_to_go_target.reshape(B, T, 1)[:, 1:, :])
+        else:
+            states_loss, returns_to_go_loss = 0, 0
+
+        total_loss = action_loss + states_loss + returns_to_go_loss 
         self._optimizer.zero_grad()
-        action_loss.backward()
+        total_loss.backward()
         torch.nn.utils.clip_grad_norm_(self._learn_model.parameters(), 0.25)
         self._optimizer.step()
         self._scheduler.step()
+           
 
-        return {
-            'cur_lr': self._optimizer.state_dict()['param_groups'][0]['lr'],
-            'action_loss': action_loss.detach().cpu().item(),
-        }
+        if self._cfg.get('auxiliary_loss', False):
+            return {
+                'cur_lr': self._optimizer.state_dict()['param_groups'][0]['lr'],
+                'total_loss': total_loss.detach().cpu().item(),
+                'action_loss': action_loss.detach().cpu().item(),
+                'states_loss': states_loss.detach().cpu().item(),
+                'returns_to_go_loss': returns_to_go_loss.detach().cpu().item(),
+            }
+        else:
+            return {
+                'cur_lr': self._optimizer.state_dict()['param_groups'][0]['lr'],
+                'total_loss': total_loss.detach().cpu().item(),
+                'action_loss': action_loss.detach().cpu().item(),
+                'states_loss': torch.zeros_like(action_loss).item(),
+                'returns_to_go_loss': torch.zeros_like(action_loss).item(),
+            }
 
     def evaluate_on_env(self, state_mean=None, state_std=None, render=False):
         
@@ -289,9 +346,59 @@ class DTPolicy(DQNPolicy):
                 states = torch.zeros(
                     (eval_batch_size, self.max_eval_ep_len, state_dim), dtype=torch.float32, device=self.device
                 )
-                rewards_to_go = torch.zeros(
-                    (eval_batch_size, self.max_eval_ep_len, 1), dtype=torch.float32, device=self.device
-                )
+                if self._cfg.model.get('state_goal', False):
+                    rewards_to_go = torch.zeros(
+                        (eval_batch_size, self.max_eval_ep_len, self.state_dim), dtype=torch.float32, device=self.device
+                    )
+                    # import ipdb; ipdb.set_trace()
+                    if self.env_name == 'Hopper-v3':
+                        ratio = self.ratio
+                        medium = torch.tensor([1.3112685680389404, -0.08469261974096298, -0.5382542610168457, -0.07201051712036133, 0.049344852566719055, 2.106581926345825, -0.15014714002609253, 0.008785112760961056, -0.2848515808582306, -0.18539157509803772, -0.2846825420856476], device=self.device).float()
+                        expert = torch.tensor([1.348850965499878, -0.11204933375120163, -0.550708532333374, -0.1316361278295517, -0.0031308038160204887, 2.606743574142456, 0.022303320467472076, -0.01657019928097725, -0.06813174486160278, -0.05349138379096985, 0.04012826085090637], device=self.device).float()
+                        self.rtg_target = ratio * expert + (1 - ratio) * medium
+                    elif self.env_name == 'HalfCheetah-v3':
+                        ratio = self.ratio
+                        medium = torch.tensor([-0.0684533417224884, 0.016389088705182076, -0.18353942036628723, -0.2762347161769867, -0.3406224250793457, -0.09342234581708908, -0.21320895850658417, -0.08775322139263153, 5.17288875579834, -0.042751897126436234, -0.03614707291126251, 0.14031197130680084, 0.06066203862428665, 0.09548277407884598, 0.06728935986757278, 0.005867088679224253, 0.013621795922517776], device=self.device).float()
+                        expert = torch.tensor([-0.04489380493760109, 0.03229331225156784, 0.06037571281194687, -0.1708163619041443, -0.1948034167289734, -0.05755220726132393, 0.09699936211109161, 0.03238246962428093, 11.04673957824707, -0.08001191914081573, -0.3236390948295593, 0.36369049549102783, 0.42418915033340454, 0.40823298692703247, 1.1076111793518066, -0.4877481460571289, -0.07378903776407242], device=self.device).float()
+                        self.rtg_target = ratio * expert + (1 - ratio) * medium
+                    elif self.env_name == 'Walker2d-v3':
+                        ratio = self.ratio
+                        medium = torch.tensor([1.2189686298370361, 0.14164122939109802, -0.03705529123544693, -0.13813918828964233, 0.5138940811157227, -0.047185178846120834, -0.47281956672668457, 0.042268332093954086, 2.3946220874786377, -0.03145574405789375, 0.044610973447561264, -0.024010702967643738, -0.10130638629198074, 0.09077298641204834, -0.004206471145153046, -0.12143220007419586, -0.5497634410858154], device=self.device).float()
+                        expert = torch.tensor([1.2385023832321167, 0.19576017558574677, -0.10479946434497833, -0.1859603375196457, 0.22955934703350067, 0.022799348458647728, -0.3737868070602417, 0.33816614747047424, 3.9246129989624023, -0.00483204610645771, 0.025160973891615868, -0.005045710131525993, -0.017238497734069824, -0.4814542531967163, 0.0004888453986495733, -0.0007198172388598323, 0.0035148432943969965], device=self.device).float()
+                        self.rtg_target = ratio * expert + (1 - ratio) * medium
+                    self.rtg_scale = 1.0
+                    # import ipdb; ipdb.set_trace()
+                    if self._cfg.get('top_state', 0):
+                        import pickle
+                        import numpy as np
+                        env_id = self.env_name.split('-')[0].lower()
+                        dataset_path = f'/mnt/lustre/zhangyinmin.p/dataset/d4rl_data/{env_id}-expert-v2.pkl'
+
+                        with open(dataset_path, 'rb') as f:
+                            trajectories = pickle.load(f)
+                        rews = []
+                        stats = []
+                        for i in range(len(trajectories)):
+                            traj = trajectories[i]
+                            for j in range(len(traj['rewards']) - 20):
+                                rews.append(sum(traj['rewards'][j:j+20]))
+                                stats.append(np.array(traj['observations'][j:j+20]).mean(axis=0))
+                        rews = np.array(rews)
+                        stats = np.array(stats)
+                        idx = np.argsort(rews)[::-1][:int(rews.shape[0]*self._cfg.top_state)]
+                        # import ipdb; ipdb.set_trace()
+                        # print(stats[idx, :].mean(axis=0))
+                        self.rtg_target = torch.tensor(stats[idx, :].mean(axis=0), device=self.device).float()
+                    # self.rtg_target = expert
+                else:    
+                    rewards_to_go = torch.zeros(
+                        (eval_batch_size, self.max_eval_ep_len, 1), dtype=torch.float32, device=self.device
+                    )
+                if self._cfg.get('use_past_reward', False):
+                    self.rtg_target = 0
+                    rewards_to_go = torch.zeros(
+                        (eval_batch_size, self.max_eval_ep_len, 1), dtype=torch.float32, device=self.device
+                    )
 
                 # init episode
                 running_state = env.reset()
@@ -312,11 +419,16 @@ class DTPolicy(DQNPolicy):
                         running_rtg = running_rtg - (running_reward / self.rtg_scale)
                     else:
                         running_rtg = running_rtg
+                    if self._cfg.get('use_past_reward', False):
+                        running_rtg = running_rtg + (running_reward / self.rtg_scale)
                     if self.discrete:
                         if self._with_decrement_return:
                             running_rtg = running_rtg - (running_reward / (self.rtg_target * self.rtg_scale))
                         else:
                             running_rtg = self.discrete_bin
+                        if self.inverse_discrete_bin:
+                            # running_rtg = 0
+                            running_rtg = (self.discrete_bin - self.discrete_bin//2)%self.discrete_bin
 
                     rewards_to_go[0, t] = running_rtg
 
@@ -386,11 +498,11 @@ class DTPolicy(DQNPolicy):
         eval_env_score = eval_avg_reward
         if eval_env_score >= self.max_env_score:
             logging.info("saving max env score model at: " + self.save_best_model_path)
-            torch.save(self._learn_model.state_dict(), self.save_best_model_path)
+            # torch.save(self._learn_model.state_dict(), self.save_best_model_path)
             self.max_env_score = eval_env_score
 
         logging.info("saving current model at: " + self.save_model_path)
-        torch.save(self._learn_model.state_dict(), self.save_model_path)
+        # torch.save(self._learn_model.state_dict(), self.save_model_path)
 
         return self.max_env_score >= self.stop_value, eval_env_score
 
@@ -417,7 +529,11 @@ class DTPolicy(DQNPolicy):
         return 'dt', ['ding.model.template.decision_transformer']
 
     def _monitor_vars_learn(self) -> List[str]:
-        return ['cur_lr', 'action_loss']
+        return ['cur_lr', 
+                'action_loss',
+                'total_loss',
+                'states_loss',
+                'returns_to_go_loss',]
 
     def set_norm_statistics(self, mean: float, std: float) -> None:
         r"""
