@@ -113,7 +113,7 @@ class MiniGridEnv(BaseEnv):
                 self.display_frames_as_gif(self._frames, path)
                 self._save_replay_count += 1
         obs = to_ndarray(obs)
-        rew = to_ndarray([rew])  # wrapped to be transferred to a array with shape (1,)
+        rew = to_ndarray(rew)  # wrapped to be transferred to a array with shape (1,)
         return BaseEnvTimestep(obs, rew, done, info)
 
     def random_action(self) -> np.ndarray:

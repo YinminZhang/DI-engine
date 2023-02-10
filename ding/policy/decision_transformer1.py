@@ -3,7 +3,6 @@
 
 from cmath import e
 from random import random
-from re import L
 from typing import List, Dict, Any, Tuple, Union
 from collections import namedtuple
 from torch.distributions import Normal, Independent
@@ -27,8 +26,8 @@ import csv
 from .dqn import DQNPolicy
 
 
-@POLICY_REGISTRY.register('dt')
-class DTPolicy(DQNPolicy):
+@POLICY_REGISTRY.register('dt1')
+class DT1Policy(DQNPolicy):
     r"""
     Overview:
         Policy class of DT algorithm in discrete environments.
@@ -158,6 +157,10 @@ class DTPolicy(DQNPolicy):
                     max_step=300,
                 )
                 self._env = MiniGridEnv(EasyDict(config))
+            elif 'smac' in self.env_name.lower():
+                from easydict import EasyDict
+                from dizoo.smac.envs import SMACEnv
+                self._env = SMACEnv(EasyDict(self._cfg.env))
             else:
                 self._env = gym.make(self.env_name)
 
@@ -189,15 +192,12 @@ class DTPolicy(DQNPolicy):
             Returns:
                 - info_dict (:obj:`Dict[str, Any]`): Including current lr and loss.
         """
-
         self._learn_model.train()
-
         timesteps, states, actions, returns_to_go, traj_mask = data
-
         timesteps = timesteps.to(self.device)  # B x T
         states = states.to(self.device)  # B x T x state_dim
         actions = actions.to(self.device)  # B x T x act_dim
-        returns_to_go = returns_to_go.to(self.device)  # B x T x 1
+        returns_to_go = returns_to_go.to(self.device).float()  # B x T x 1
         traj_mask = traj_mask.to(self.device)  # B x T
         action_target = torch.clone(actions).detach().to(self.device)
 
@@ -239,7 +239,6 @@ class DTPolicy(DQNPolicy):
             states_inputs = torch.clone(states).detach().to(self.device)
             actions_inputs = torch.clone(actions).detach().to(self.device)
             returns_to_go_inputs = torch.clone(returns_to_go).detach().to(self.device)
-        # import ipdb;ipdb.set_trace()
         state_preds, action_preds, return_preds = self._learn_model.forward(
             timesteps=timesteps, states=states_inputs, actions=actions_inputs, returns_to_go=returns_to_go_inputs
         )
@@ -400,7 +399,21 @@ class DTPolicy(DQNPolicy):
                         # print(stats[idx, :].mean(axis=0))
                         self.rtg_target = torch.tensor(stats[idx, :].mean(axis=0), device=self.device).float()
                     # self.rtg_target = expert
-                    
+                    if self._cfg.get('use_past_reward_expert', False):
+                        import pickle
+                        import numpy as np
+                        env_id = self.env_name.split('-')[0].lower()
+                        dataset_path = f'/mnt/lustre/zhangyinmin.p/dataset/d4rl_data/{env_id}-expert-v2.pkl'
+
+                        with open(dataset_path, 'rb') as f:
+                            trajectories = pickle.load(f)
+                        # rews = []
+                        episode_states = []
+                        for i in range(len(trajectories)):
+                            traj = trajectories[i]
+                            episode_states.append(traj['observations'])
+                        episode_states = np.array(episode_states)
+                        self.rtg_target = torch.tensor(episode_states.mean(axis=0), device=self.device).float()
                 else:    
                     rewards_to_go = torch.zeros(
                         (eval_batch_size, self.max_eval_ep_len, 1), dtype=torch.float32, device=self.device
@@ -410,44 +423,6 @@ class DTPolicy(DQNPolicy):
                     rewards_to_go = torch.zeros(
                         (eval_batch_size, self.max_eval_ep_len, 1), dtype=torch.float32, device=self.device
                     )
-                if self._cfg.get('use_past_reward_expert', False):
-                        import pickle
-                        import numpy as np
-                        env_id = self.env_name.split('-')[0].lower()
-                        dataset_path = f'/mnt/lustre/zhangyinmin.p/dataset/d4rl_data/{env_id}-expert-v2.pkl'
-
-                        with open(dataset_path, 'rb') as f:
-                            trajectories = pickle.load(f)
-                        episode_rews = []
-                        episode_states = []
-                        for i in range(len(trajectories)):
-                            traj = trajectories[i]
-                            episode_states.append(traj['observations'])
-                            episode_rews.append(traj['rewards'])
-                        episode_states = np.array(episode_states)
-                        episode_rews = np.array(episode_rews)
-                        episode_full = []
-                        episode_part = []
-                        for e in episode_rews:
-                            if len(e) == 1000:
-                                episode_full.append(e)
-                            else:
-                                episode_part.append(e)
-                        episode_full = np.array(episode_full)
-                        episode_rews = []
-                        for e in episode_part:
-                            episode_rews.append(e.tolist()+episode_full.mean(axis=0)[len(e):].tolist())
-                        # print(np.array(episode_rews).shape, episode_full.shape)
-                        if self.env_name == 'HalfCheetah-v3':
-                            episode_rews = episode_full
-                        else:
-                            episode_rews = np.concatenate([np.array(episode_rews), episode_full], axis=0)
-                        episode_rews_mean = episode_rews.mean(axis=0)
-                        episode_past_reward = np.zeros_like(episode_rews_mean)
-                        for i in range(episode_rews_mean.shape[0]):
-                            episode_past_reward[i] = episode_past_reward[i-1] + episode_rews_mean[i] / self.rtg_scale
-                        self.rtg_target = torch.tensor(episode_past_reward, device=self.device).float()
-                       
 
                 # init episode
                 running_state = env.reset()
@@ -465,10 +440,7 @@ class DTPolicy(DQNPolicy):
 
                     # calcualate running rtg and add it in placeholder
                     if self._with_decrement_return:
-                        if self._cfg.model.get('state_goal', False):
-                            running_rtg = running_rtg - (running_reward / self.rtg_scale)
-                        else:
-                            running_rtg = (running_rtg - torch.from_numpy(running_state).to(self.device)/1000) * 1000/999
+                        running_rtg = running_rtg - (running_reward / self.rtg_scale)
                     else:
                         running_rtg = running_rtg
                     if self._cfg.get('use_past_reward', False):
@@ -481,11 +453,8 @@ class DTPolicy(DQNPolicy):
                         if self.inverse_discrete_bin:
                             # running_rtg = 0
                             running_rtg = (self.discrete_bin - self.discrete_bin//2)%self.discrete_bin
-       
-                    if self._cfg.get('use_past_reward_expert', False):
-                        rewards_to_go[0, :] = self.rtg_target.reshape(-1, 1)
-                    else:
-                        rewards_to_go[0, t] = running_rtg
+
+                    rewards_to_go[0, t] = running_rtg
                     # import ipdb;ipdb.set_trace()
                     if t < self.context_len:
                         _, act_preds, _ = self._learn_model.forward(

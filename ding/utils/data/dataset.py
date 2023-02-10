@@ -4,7 +4,7 @@ import torch
 import numpy as np
 from ditk import logging
 from copy import deepcopy
-
+import glob
 from easydict import EasyDict
 from torch.utils.data import Dataset
 
@@ -289,9 +289,11 @@ class D4RLTrajectoryDataset(Dataset):
         
         self.context_len = context_len
         # load dataset
-        with open(dataset_path, 'rb') as f:
-            self.trajectories = pickle.load(f)
-
+        if cfg.policy.learn.marl_mae:
+            self.trajectories = marl2d4rl(dataset_path)
+        else:
+            with open(dataset_path, 'rb') as f:
+                self.trajectories = pickle.load(f)
         if isinstance(self.trajectories[0], list):
             # for our collected dataset, e.g. cartpole/lunarlander case
             trajectories_tmp = []
@@ -688,3 +690,26 @@ def create_dataset(cfg, **kwargs) -> Dataset:
     cfg = EasyDict(cfg)
     import_module(cfg.get('import_names', []))
     return DATASET_REGISTRY.build(cfg.policy.collect.data_type, cfg=cfg, **kwargs)
+
+
+def marl2d4rl(data_dir):
+    ret=[]
+    path_files = glob.glob(pathname=data_dir + "*")
+    # for file in sorted(path_files):
+    for i in range(len(path_files)):
+        episode = torch.load(path_files[i])
+        agent_num = len(episode)
+        episode_len = len(episode[0])
+        local_obs = np.vstack([np.array(step[0]) for a in episode for step in a ]).reshape(agent_num, episode_len, -1).transpose(1,0,-1).reshape(agent_num*episode_len, -1)
+        global_obs = np.vstack([np.array(step[1]) for a in episode for step in a ]).reshape(agent_num, episode_len, -1).transpose(1,0,-1).reshape(agent_num*episode_len, -1)
+        action = np.vstack([np.array(step[2]) for a in episode for step in a ]).reshape(agent_num, episode_len, -1).transpose(1,0,-1).reshape(agent_num*episode_len, -1)
+        reward = np.vstack([np.array(step[3]) for a in episode for step in a ]).reshape(agent_num, episode_len, -1).transpose(1,0,-1).reshape(agent_num*episode_len, -1)
+        done = np.vstack([np.array(step[4]) for a in episode for step in a ]).reshape(agent_num, episode_len, -1).transpose(1,0,-1).reshape(agent_num*episode_len, -1)
+        ret.append({
+            'observations': local_obs.astype(np.float32),
+            'global_obs': global_obs.astype(np.float32),
+            'actions': action,
+            'rewards': reward,
+            'done': done,
+        })
+    return ret

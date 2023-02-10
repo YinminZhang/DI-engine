@@ -39,6 +39,7 @@ from .r2d3 import R2D3Policy
 from .d4pg import D4PGPolicy
 from .cql import CQLPolicy, CQLDiscretePolicy
 from .decision_transformer import DTPolicy
+from .decision_transformer1 import DT1Policy
 from .pdqn import PDQNPolicy
 from .sac import SQILSACPolicy
 
@@ -282,6 +283,10 @@ class CQLDiscreteCommandModePolicy(CQLDiscretePolicy, EpsCommandModePolicy):
 
 @POLICY_REGISTRY.register('dt_command')
 class DTCommandModePolicy(DTPolicy, DummyCommandModePolicy):
+    pass
+
+@POLICY_REGISTRY.register('dt1_command')
+class DTCommandModePolicy(DT1Policy, DummyCommandModePolicy):
     pass
 
 

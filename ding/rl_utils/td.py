@@ -25,8 +25,8 @@ def discount_cumsum(x, gamma: float = 1.0) -> np.ndarray:
 def discount_cumsum_past(x, gamma: float = 1.0) -> np.ndarray:
     assert abs(gamma - 1.) < 1e-5, "gamma equals to 1.0 in original decision transformer paper"
     disc_cumsum = np.zeros_like(x)
-    disc_cumsum[-1] = x[-1]
-    for t in range(1, x.shape[0]):
+    # disc_cumsum[0] = x[0]
+    for t in range(x.shape[0]):
         disc_cumsum[t] = x[t] + gamma * disc_cumsum[t - 1]
     return disc_cumsum
 
