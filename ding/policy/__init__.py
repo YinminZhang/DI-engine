@@ -20,6 +20,7 @@ from .ppo import PPOPolicy, PPOPGPolicy, PPOOffPolicy
 from .sac import SACPolicy, DiscreteSACPolicy, SQILSACPolicy
 from .cql import CQLPolicy, DiscreteCQLPolicy
 from .edac import EDACPolicy
+from .so2 import SO2Policy
 from .impala import IMPALAPolicy
 from .ngu import NGUPolicy
 from .r2d2 import R2D2Policy

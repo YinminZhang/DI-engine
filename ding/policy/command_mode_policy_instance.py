@@ -49,6 +49,7 @@ from .madqn import MADQNPolicy
 from .bdq import BDQPolicy
 from .bcq import BCQPolicy
 from .edac import EDACPolicy
+from .so2 import SO2Policy
 from .prompt_pg import PromptPGPolicy
 from .plan_diffuser import PDPolicy
 from .happo import HAPPOPolicy
