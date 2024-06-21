@@ -1,0 +1,539 @@
+
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en">
+<!--<![endif]-->
+
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>新旧pipeline的异同 &mdash; DI-engine 0.1.0 documentation</title>
+  
+
+  <link rel="shortcut icon" href="../_static/images/favicon.ico" />
+  
+  
+
+  
+
+  
+  
+  
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!-- <link rel="stylesheet" href="../_static/pygments.css" type="text/css" /> -->
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/style.css" type="text/css" />
+  <link rel="index" title="Index" href="../genindex.html" />
+  <link rel="search" title="Search" href="../search.html" />
+  <link rel="next" title="如何高效构建决策环境" href="create_env_zh.html" />
+  <link rel="prev" title="如何自定义神经网络模型（model）" href="custom_model_zh.html" />
+    <link href="../_static/css/style.css" rel="stylesheet" type="text/css">
+
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+  <script>
+    MathJax = {
+        chtml: {
+            scale: 1,
+            minScale: 1,
+        },
+        svg: {
+            scale: 1,
+            minScale: 1,
+        }
+    }
+</script>
+
+  <!-- Preload the theme fonts -->
+
+<link rel="preload" href="../_static/fonts/FreightSans/freight-sans-book.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/FreightSans/freight-sans-medium.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/IBMPlexMono/IBMPlexMono-Medium.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/FreightSans/freight-sans-bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/FreightSans/freight-sans-medium-italic.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/IBMPlexMono/IBMPlexMono-SemiBold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+
+<!-- Preload the katex fonts -->
+
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Math-Italic.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Main-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Main-Bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size1-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size4-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size2-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size3-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Caligraphic-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.2/css/all.css"
+    integrity="sha384-vSIIfh2YWi9wW0r9iZe7RJPrKwp6bG+s9QZMoITbCckVJqGCCRhc+ccxNcdpHuYu" crossorigin="anonymous">
+</head>
+
+<div class="container-fluid header-holder tutorials-header" id="header-holder">
+  <div class="container">
+    <div class="header-container">
+      <a class="header-logo" href="https://di-engine-docs.readthedocs.io/en/latest/"
+        aria-label="OpenMMLab"></a>
+
+      <div class="main-menu">
+        <ul>
+          <li>
+            <a href="https://github.com/opendilab/DI-engine" target="_blank">GitHub</a>
+          </li>
+          <li >
+            <div id="resourcesDropdownButton" data-toggle="resources-dropdown" class="resources-dropdown">
+              <a
+                class="resource-option with-down-arrow">
+                OpenDILab
+              </a>
+              <div class="resources-dropdown-menu">
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/DI-engine" target="_blank">
+                  <span class="dropdown-title">DI-engine </span>
+                  <p>OpenDILab Decision AI Engine</p>
+                </a>
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/DI-star" target="_blank">
+                  <span class="dropdown-title">DI-star </span>
+                  <p>OpenDILab Decision AI in StarCraftII</p>
+                </a>
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/DI-drive" target="_blank">
+                  <span class="dropdown-title">DI-drive </span>
+                  <p>OpenDILab Auto-driving platform</p>
+                </a>
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/GoBigger" target="_blank">
+                  <span class="dropdown-title">GoBigger </span>
+                  <p>OpenDILab Multi-Agent Environment</p>
+                </a>
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/DI-smartcross" target="_blank">
+                  <span class="dropdown-title">DI-smartcross </span>
+                  <p>Decision Intelligence Platform for Traffic Crossing Signal Control</p>
+                </a>
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/DI-treetensor" target="_blank">
+                  <span class="dropdown-title">DI-treetensor </span>
+                  <p>Tree Nested PyTorch Tensor Lib</p>
+                </a>
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/DI-sheep" target="_blank">
+                  <span class="dropdown-title">DI-sheep </span>
+                  <p>Deep Reinforcement Learning + 3 Tiles Game</p>
+                </a>
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/awesome-model-based-RL" target="_blank">
+                  <span class="dropdown-title">awesome-model-based-RL </span>
+                  <p>A curated list of awesome model based RL resources (continually updated)</p>
+                </a>
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/awesome-decision-transformer" target="_blank">
+                  <span class="dropdown-title">awesome-decision-transformer </span>
+                  <p>A curated list of Decision Transformer resources (continually updated)</p>
+                </a>
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/awesome-exploration-rl" target="_blank">
+                  <span class="dropdown-title">awesome-exploration-rl </span>
+                  <p>A curated list of awesome exploration RL resources (continually updated)</p>
+                </a>
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/awesome-multi-modal-reinforcement-learning" target="_blank">
+                  <span class="dropdown-title">awesome-multi-modal-reinforcement-learning </span>
+                  <p>A curated list of Multi-Modal Reinforcement Learning resources (continually updated)</p>
+                </a>
+              </div>
+          </li>
+        </ul>
+      </div>
+
+      <a class="main-menu-open-button" href="#" data-behavior="open-mobile-menu"></a>
+    </div>
+  </div>
+</div>
+
+<body class="pytorch-body">
+
+   
+
+  
+
+  <div class="table-of-contents-link-wrapper">
+    <span>Table of Contents</span>
+    <a href="#" class="toggle-table-of-contents" data-behavior="toggle-table-of-contents"></a>
+  </div>
+
+  <nav data-toggle="wy-nav-shift" class="pytorch-left-menu" id="pytorch-left-menu">
+    <div class="pytorch-side-scroll">
+      <div class="pytorch-menu pytorch-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        <div class="pytorch-left-menu-search">
+          
+
+          
+          
+          
+          
+
+          
+
+
+
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search Docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        
+        
+        
+        
+        
+        <p class="caption" role="heading"><span class="caption-text">用户指南</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../00_intro/index_zh.html">DI-engine 简介</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../01_quickstart/index_zh.html">快速开始</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../02_algo/index_zh.html">强化学习算法分类</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../03_system/index_zh.html">系统设计</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index_zh.html">最佳实践</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../05_api_doc/index.html">API Doc</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../06_faq/index_zh.html">FAQ</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">强化学习教程</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../10_concepts/index_zh.html">强化学习基础概念介绍</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../11_dizoo/index_zh.html">从 DI-zoo 开始学习</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../12_policies/index_zh.html">强化学习算法</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../13_envs/index_zh.html">强化学习环境示例</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">开发者规范</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../20_spec/index_zh.html">代码规范</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../21_code_style/index_zh.html">代码风格指南</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../22_test/index_zh.html">单元测试指南</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../23_visual/index_zh.html">图像与可视化</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../24_cooperation/index_zh.html">Github 合作模式</a></li>
+</ul>
+
+        
+        
+      </div>
+    </div>
+  </nav>
+
+  <div class="pytorch-container">
+    <div class="pytorch-page-level-bar" id="pytorch-page-level-bar">
+      <div class="pytorch-breadcrumbs-wrapper">
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="pytorch-breadcrumbs">
+    
+      <li>
+        <a href="../index_zh.html">
+            Docs
+        </a> &gt;
+      </li>
+
+        
+          <li><a href="index_zh.html">最佳实践</a> &gt;</li>
+        
+      <li>新旧pipeline的异同</li>
+    
+    
+      <li class="pytorch-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/04_best_practice/diff_in_new_pipeline_zh.rst.txt" rel="nofollow"><img src="../_static/images/view-page-source-icon.svg"></a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+</div>
+      </div>
+
+      <div class="pytorch-shortcuts-wrapper" id="pytorch-shortcuts-wrapper">
+        Shortcuts
+      </div>
+    </div>
+
+    <section data-toggle="wy-nav-shift" id="pytorch-content-wrap" class="pytorch-content-wrap">
+      <div class="pytorch-content-left">
+        
+          <div class="rst-content">
+            
+            <div role="main" class="main-content" itemscope="itemscope" itemtype="http://schema.org/Article">
+              <article itemprop="articleBody" id="pytorch-article" class="pytorch-article">
+                
+  <section id="pipeline">
+<h1>新旧pipeline的异同<a class="headerlink" href="#pipeline" title="Permalink to this heading">¶</a></h1>
+<section id="id1">
+<h2>旧pipeline<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
+<section id="id2">
+<h3><strong>是什么</strong><a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h3>
+<p><a class="reference external" href="https://github.com/opendilab/DI-engine/blob/main/dizoo/atari/entry/atari_dqn_main.py">旧版本</a> 的运行逻辑是”线性”的，在main函数中，包含了模型训练、测试、保存以及中间数据记录的直观表达，另外在新版本的 <a class="reference external" href="https://github.com/opendilab/DI-engine/blob/main/ding/entry/">entry</a> 目录下保留了这类入口文件。</p>
+<p>ps：这里所谓的”线性”是指在进行代码阅读时，阅读到哪一行，程序就运行到哪一行，当前文件里没有的代码也可以通过跳转来阅读，可以说是”所读即所得”。
+数据流的传递是非常直观的，需要什么就定义什么，定义什么就使用什么。</p>
+<p>基本都可以规范为如下流程：</p>
+<p>config -&gt;</p>
+<p>env(include env manager, collect_env and eval_env) initialization -&gt; policy and model initialization (model initialization may be in policy) -&gt; logger initialization -&gt;</p>
+<p>trainer(or learner) initialization -&gt; collect and evaluator initialization -&gt; replay buffer(only for online rl) create -&gt;</p>
+<p>start train loop(omitted)</p>
+<img alt="../_images/diff_in_new_pipeline.png" class="align-center" src="../_images/diff_in_new_pipeline.png" />
+</section>
+<section id="id4">
+<h3><strong>为什么</strong><a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h3>
+<p>这一版本的代码阅读上并不困难，仿写或改写一个算法是非常直观且方便的。</p>
+<p>在这一流程中，给予开发者的自由度是非常高的，在仿写、改写、debug过程中并不需要考虑太多的接口及调用，仅处理好代码中用到的调用（如policy、model初始化时调用所需参数）即可。</p>
+<p>但是对于单个算法而言简单、顺畅的流程于整体而言未必是一件好事，同时较高的自由度会带来更大的维护难度和负担，导致我们这一版本逐渐庞大，代码上有很多冗余。比如在train loop中，几乎所有算法都依照环境交互、模型交互、模型训练、记录保存（模型保存）等固定流程进行，很明显这些流程是可以被抽象出来的。</p>
+<p>总结来说，这一版本对强化学习背景知识有一定要求，自由度高，开发背景知识门槛低，代码耦合程度高。</p>
+</section>
+</section>
+<section id="id5">
+<h2>新pipeline<a class="headerlink" href="#id5" title="Permalink to this heading">¶</a></h2>
+<section id="id6">
+<h3><strong>是什么</strong><a class="headerlink" href="#id6" title="Permalink to this heading">¶</a></h3>
+<p>新版本下，我们添加了重要组件 <a class="reference external" href="https://di-engine-docs.readthedocs.io/zh_CN/latest/03_system/middleware.html">framework-middleware</a> ，即 <a class="reference external" href="https://di-engine-docs.readthedocs.io/zh_CN/latest/03_system/middleware_zh.html">框架中间件</a> ，通过中间件将之前零散的算法统一到框架的管理之中，能很好地实现未来并行化的需求，让更多的开发者在具有一定的相关知识后就能使用此工具实现强化学习智能体的开发。</p>
+<p>由于框架的抽象，在初步接触新版本时，可能会觉得开发的自由受到了限制，但这是一种错觉！我们在新版本的实现中以另一种方式保留了开发的自由，参照下图：</p>
+<img alt="../_images/pipeline.png" class="align-center" src="../_images/pipeline.png" />
+<p>仅将一些流程（如stepcollect、train、ckptsave）抽象为一个个模块（图中不同颜色的方块），而在如何使用这些模块，以及使用什么模块等方面仍保有极大的自由。</p>
+<p>换句话说，新版本中将算法的各种流程抽象为新的函数，以期望新版本中出现更多的”函数调用”而不是流程编写。这些函数各自负责整个训练流程的一个模块，如evaluator负责评价模型性能，trainer负责模型训练，CkptSaver负责模型的保存等等。而这些模块中如果需要数据传递，则统一使用Context来进行。我们将Context当作所有task的背景上下文，可以取用Context的数据或将数据写入Context。</p>
+<p>新版本下数据流的传递有了很大变化，由于流程化的方式变更为模块化，直观的变量定义并不能满足需要，我们使用context来实现各模块间的数据传递，context挂载在我们的中央管理模块task上，task中调用的所有模块都可以使用context来获取自己想要的数据。</p>
+<p>task的管理方式如下图：</p>
+<img alt="../_images/async.png" class="align-center" src="../_images/async.png" />
+<p>新的版本可以规范为以下流程：</p>
+<p>config -&gt; task start -&gt;</p>
+<p>env(include collect_env and eval_env) init -&gt; policy and model init (model init may in policy) -&gt; logger init -&gt;</p>
+<p>Eval call -&gt; Collector call -&gt; Learner call -&gt; logger call -&gt; CkptSaver call (all in this line can be customized) -&gt;</p>
+<p>task.run()</p>
+</section>
+<section id="id8">
+<h3><strong>为什么</strong><a class="headerlink" href="#id8" title="Permalink to this heading">¶</a></h3>
+<p>这一版本并没有将老版本的优点抹杀，仿写、改写仍是直观且方便的，开发过程中也是十分自由的。另外新版本在需要用户编写的代码量上明显降低，特别是在一些经典算法上，所有模块都已经完成了抽象工作并已经包含在middleware中。</p>
+<p>新的版本能更好地支持并行化的工作，更好的模块化是更好地并行的准备工作。但是代码流程的理解难度增加了，想要逐行地了解文件中每一句话都在做什么更困难了。当然，这一定程度上是模块化的代价。后面会考虑对这点进行优化。</p>
+<p>在调试中也稍微添加了一些阻碍，因为总体流程上是由task管理而不能按代码序列执行，所以需要先阅读上一小节或官方文档中 <a class="reference external" href="https://di-engine-docs.readthedocs.io/en/latest/03_system/index.html">关于系统设计的部分</a>，理解了task的机制后对于代码如何运行以及应当如何修改等都会得心应手了。</p>
+<p>这一版本的优势在于降低了对于强化学习背景知识的门槛，同时保留了开发较快的优点，但在理解难易程度和学习成本上稍有不足。</p>
+<p>总的来说，新版本的强化学习背景知识门槛有所降低，开发自由度高，开发背景知识门槛略有提高，代码耦合程度低。</p>
+</section>
+</section>
+<section id="id10">
+<h2>新旧pipeline特点对照表<a class="headerlink" href="#id10" title="Permalink to this heading">¶</a></h2>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 16.7%" />
+<col style="width: 24.2%" />
+<col style="width: 18.2%" />
+<col style="width: 10.6%" />
+<col style="width: 10.6%" />
+<col style="width: 10.6%" />
+<col style="width: 9.1%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>新旧版本对比表</p></th>
+<th class="head"><p>强化学习背景知识要求</p></th>
+<th class="head"><p>开发背景知识要求</p></th>
+<th class="head"><p>代码耦合度</p></th>
+<th class="head"><p>开发自由度</p></th>
+<th class="head"><p>上手难易度</p></th>
+<th class="head"><p>并行潜力</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>新</p></td>
+<td><p><strong>低</strong></p></td>
+<td><p>中</p></td>
+<td><p><strong>低</strong></p></td>
+<td><p><strong>高</strong></p></td>
+<td><p>中</p></td>
+<td><p><strong>高</strong></p></td>
+</tr>
+<tr class="row-odd"><td><p>旧</p></td>
+<td><p>高</p></td>
+<td><p><strong>低</strong></p></td>
+<td><p>高</p></td>
+<td><p>高</p></td>
+<td><p><strong>低</strong></p></td>
+<td><p>低</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+
+
+              </article>
+              
+            </div>
+            <footer>
+  
+  <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+    
+    <a href="create_env_zh.html" class="btn btn-neutral float-right" title="如何高效构建决策环境" accesskey="n"
+      rel="next">Next <img src="../_static/images/chevron-right-blue.svg"
+        class="next-page"></a>
+    
+    
+    <a href="custom_model_zh.html" class="btn btn-neutral" title="如何自定义神经网络模型（model）" accesskey="p"
+      rel="prev"><img src="../_static/images/chevron-right-blue.svg" class="previous-page"> Previous</a>
+    
+  </div>
+  
+
+  <hr>
+
+  <div role="contentinfo">
+    <p>
+      &copy; Copyright 2021, OpenDILab Contributors.
+
+    </p>
+  </div>
+  
+  <div>
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a
+      href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the
+      Docs</a>.
+  </div>
+   
+
+</footer>
+          </div>
+        </div>
+
+        <div class="pytorch-content-right" id="pytorch-content-right">
+          <div class="pytorch-right-menu" id="pytorch-right-menu">
+            <div class="pytorch-side-scroll" id="pytorch-side-scroll-right">
+              <ul>
+<li><a class="reference internal" href="#">新旧pipeline的异同</a><ul>
+<li><a class="reference internal" href="#id1">旧pipeline</a><ul>
+<li><a class="reference internal" href="#id2"><strong>是什么</strong></a></li>
+<li><a class="reference internal" href="#id4"><strong>为什么</strong></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id5">新pipeline</a><ul>
+<li><a class="reference internal" href="#id6"><strong>是什么</strong></a></li>
+<li><a class="reference internal" href="#id8"><strong>为什么</strong></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id10">新旧pipeline特点对照表</a></li>
+</ul>
+</li>
+</ul>
+
+            </div>
+          </div>
+        </div>
+    </section>
+  </div>
+
+  
+
+
+  
+
+  
+  <script type="text/javascript" id="documentation_options" data-url_root="../"
+    src="../_static/documentation_options.js"></script>
+  <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+  <script src="../_static/doctools.js"></script>
+  <script src="../_static/sphinx_highlight.js"></script>
+  
+
+  
+
+  <script type="text/javascript" src="../_static/js/vendor/popper.min.js"></script>
+  <script type="text/javascript" src="../_static/js/vendor/bootstrap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/list.js/1.5.0/list.min.js"></script>
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+    jQuery(function () {
+      SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+  <!-- Begin Footer -->
+
+  <div class="container-fluid docs-tutorials-resources" id="docs-tutorials-resources">
+  </div>
+
+  <!-- End Footer -->
+
+  <!-- Begin Mobile Menu -->
+
+  <div class="mobile-main-menu">
+    <div class="container-fluid">
+      <div class="container">
+        <div class="mobile-main-menu-header-container">
+          <a class="header-logo" href="https://di-engine-docs.readthedocs.io/en/latest/" aria-label="OpenMMLab"></a>
+          <a class="main-menu-close-button" href="#" data-behavior="close-mobile-menu"></a>
+        </div>
+      </div>
+    </div>
+
+    <div class="mobile-main-menu-links-container">
+      <div class="main-menu">
+        <ul>
+          <li>
+            <a href="https://github.com/opendilab/DI-engine" target="_blank">GitHub</a>
+          </li>
+      </div>
+    </div>
+  </div>
+
+  <!-- End Mobile Menu -->
+
+  <script type="text/javascript" src="../_static/js/vendor/anchor.min.js"></script>
+
+  <script type="text/javascript">
+    $(document).ready(function () {
+      mobileMenu.bind();
+      mobileTOC.bind();
+      pytorchAnchors.bind();
+      sideMenus.bind();
+      scrollToAnchor.bind();
+      highlightNavigation.bind();
+      mainMenuDropdown.bind();
+      filterTags.bind();
+
+      // Add class to links that have code blocks, since we cannot create links in code blocks
+      $("article.pytorch-article a span.pre").each(function (e) {
+        $(this).closest("a").addClass("has-code");
+      });
+    })
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,774 @@
+
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en">
+<!--<![endif]-->
+
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>ding.model &mdash; DI-engine 0.1.0 documentation</title>
+  
+
+  <link rel="shortcut icon" href="../_static/images/favicon.ico" />
+  
+  
+
+  
+
+  
+  
+  
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!-- <link rel="stylesheet" href="../_static/pygments.css" type="text/css" /> -->
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/style.css" type="text/css" />
+  <link rel="index" title="Index" href="../genindex.html" />
+  <link rel="search" title="Search" href="../search.html" />
+  <link rel="next" title="ding.policy" href="policy.html" />
+  <link rel="prev" title="ding.envs" href="env.html" />
+    <link href="../_static/css/style.css" rel="stylesheet" type="text/css">
+
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+  <script>
+    MathJax = {
+        chtml: {
+            scale: 1,
+            minScale: 1,
+        },
+        svg: {
+            scale: 1,
+            minScale: 1,
+        }
+    }
+</script>
+
+  <!-- Preload the theme fonts -->
+
+<link rel="preload" href="../_static/fonts/FreightSans/freight-sans-book.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/FreightSans/freight-sans-medium.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/IBMPlexMono/IBMPlexMono-Medium.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/FreightSans/freight-sans-bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/FreightSans/freight-sans-medium-italic.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/IBMPlexMono/IBMPlexMono-SemiBold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+
+<!-- Preload the katex fonts -->
+
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Math-Italic.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Main-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Main-Bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size1-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size4-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size2-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size3-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Caligraphic-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.2/css/all.css"
+    integrity="sha384-vSIIfh2YWi9wW0r9iZe7RJPrKwp6bG+s9QZMoITbCckVJqGCCRhc+ccxNcdpHuYu" crossorigin="anonymous">
+</head>
+
+<div class="container-fluid header-holder tutorials-header" id="header-holder">
+  <div class="container">
+    <div class="header-container">
+      <a class="header-logo" href="https://di-engine-docs.readthedocs.io/en/latest/"
+        aria-label="OpenMMLab"></a>
+
+      <div class="main-menu">
+        <ul>
+          <li>
+            <a href="https://github.com/opendilab/DI-engine" target="_blank">GitHub</a>
+          </li>
+          <li >
+            <div id="resourcesDropdownButton" data-toggle="resources-dropdown" class="resources-dropdown">
+              <a
+                class="resource-option with-down-arrow">
+                OpenDILab
+              </a>
+              <div class="resources-dropdown-menu">
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/DI-engine" target="_blank">
+                  <span class="dropdown-title">DI-engine </span>
+                  <p>OpenDILab Decision AI Engine</p>
+                </a>
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/DI-star" target="_blank">
+                  <span class="dropdown-title">DI-star </span>
+                  <p>OpenDILab Decision AI in StarCraftII</p>
+                </a>
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/DI-drive" target="_blank">
+                  <span class="dropdown-title">DI-drive </span>
+                  <p>OpenDILab Auto-driving platform</p>
+                </a>
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/GoBigger" target="_blank">
+                  <span class="dropdown-title">GoBigger </span>
+                  <p>OpenDILab Multi-Agent Environment</p>
+                </a>
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/DI-smartcross" target="_blank">
+                  <span class="dropdown-title">DI-smartcross </span>
+                  <p>Decision Intelligence Platform for Traffic Crossing Signal Control</p>
+                </a>
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/DI-treetensor" target="_blank">
+                  <span class="dropdown-title">DI-treetensor </span>
+                  <p>Tree Nested PyTorch Tensor Lib</p>
+                </a>
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/DI-sheep" target="_blank">
+                  <span class="dropdown-title">DI-sheep </span>
+                  <p>Deep Reinforcement Learning + 3 Tiles Game</p>
+                </a>
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/awesome-model-based-RL" target="_blank">
+                  <span class="dropdown-title">awesome-model-based-RL </span>
+                  <p>A curated list of awesome model based RL resources (continually updated)</p>
+                </a>
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/awesome-decision-transformer" target="_blank">
+                  <span class="dropdown-title">awesome-decision-transformer </span>
+                  <p>A curated list of Decision Transformer resources (continually updated)</p>
+                </a>
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/awesome-exploration-rl" target="_blank">
+                  <span class="dropdown-title">awesome-exploration-rl </span>
+                  <p>A curated list of awesome exploration RL resources (continually updated)</p>
+                </a>
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/awesome-multi-modal-reinforcement-learning" target="_blank">
+                  <span class="dropdown-title">awesome-multi-modal-reinforcement-learning </span>
+                  <p>A curated list of Multi-Modal Reinforcement Learning resources (continually updated)</p>
+                </a>
+              </div>
+          </li>
+        </ul>
+      </div>
+
+      <a class="main-menu-open-button" href="#" data-behavior="open-mobile-menu"></a>
+    </div>
+  </div>
+</div>
+
+<body class="pytorch-body">
+
+   
+
+  
+
+  <div class="table-of-contents-link-wrapper">
+    <span>Table of Contents</span>
+    <a href="#" class="toggle-table-of-contents" data-behavior="toggle-table-of-contents"></a>
+  </div>
+
+  <nav data-toggle="wy-nav-shift" class="pytorch-left-menu" id="pytorch-left-menu">
+    <div class="pytorch-side-scroll">
+      <div class="pytorch-menu pytorch-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        <div class="pytorch-left-menu-search">
+          
+
+          
+          
+          
+          
+
+          
+
+
+
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search Docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        
+        
+        
+        
+        
+        <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../00_intro/index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../01_quickstart/index.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../02_algo/index.html">RL Algorithm Taxonomy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../03_system/index.html">System Design</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../04_best_practice/index.html">Best Practice</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">API Doc</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../06_faq/index.html">FAQ</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reinforcement Learning Tutorial</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../10_concepts/index.html">Introduction to RL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../11_dizoo/index.html">Learn From DI-zoo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../12_policies/index.html">RL Algorithms Cheat Sheet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../13_envs/index.html">RL Env Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Developer Specification</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../20_spec/index.html">Specification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../21_code_style/index.html">Code Style Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../22_test/index.html">Unit Test Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../23_visual/index.html">Diagrams and Visualization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../24_cooperation/index.html">Github Cooperation</a></li>
+</ul>
+
+        
+        
+      </div>
+    </div>
+  </nav>
+
+  <div class="pytorch-container">
+    <div class="pytorch-page-level-bar" id="pytorch-page-level-bar">
+      <div class="pytorch-breadcrumbs-wrapper">
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="pytorch-breadcrumbs">
+    
+      <li>
+        <a href="../index.html">
+            Docs
+        </a> &gt;
+      </li>
+
+        
+          <li><a href="index.html">API Doc</a> &gt;</li>
+        
+      <li>ding.model</li>
+    
+    
+      <li class="pytorch-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/05_api_doc/model.rst.txt" rel="nofollow"><img src="../_static/images/view-page-source-icon.svg"></a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+</div>
+      </div>
+
+      <div class="pytorch-shortcuts-wrapper" id="pytorch-shortcuts-wrapper">
+        Shortcuts
+      </div>
+    </div>
+
+    <section data-toggle="wy-nav-shift" id="pytorch-content-wrap" class="pytorch-content-wrap">
+      <div class="pytorch-content-left">
+        
+          <div class="rst-content">
+            
+            <div role="main" class="main-content" itemscope="itemscope" itemtype="http://schema.org/Article">
+              <article itemprop="articleBody" id="pytorch-article" class="pytorch-article">
+                
+  <section id="ding-model">
+<h1>ding.model<a class="headerlink" href="#ding-model" title="Permalink to this heading">¶</a></h1>
+<section id="common">
+<h2>Common<a class="headerlink" href="#common" title="Permalink to this heading">¶</a></h2>
+<p>Please refer to <code class="docutils literal notranslate"><span class="pre">ding/model/common</span></code> for more details.</p>
+<section id="create-model">
+<h3>create_model<a class="headerlink" href="#create-model" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="convencoder">
+<h3>ConvEncoder<a class="headerlink" href="#convencoder" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="fcencoder">
+<h3>FCEncoder<a class="headerlink" href="#fcencoder" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="impalaconvencoder">
+<h3>IMPALAConvEncoder<a class="headerlink" href="#impalaconvencoder" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="discretehead">
+<h3>DiscreteHead<a class="headerlink" href="#discretehead" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="distributionhead">
+<h3>DistributionHead<a class="headerlink" href="#distributionhead" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="rainbowhead">
+<h3>RainbowHead<a class="headerlink" href="#rainbowhead" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="qrdqnhead">
+<h3>QRDQNHead<a class="headerlink" href="#qrdqnhead" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="quantilehead">
+<h3>QuantileHead<a class="headerlink" href="#quantilehead" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="fqfhead">
+<h3>FQFHead<a class="headerlink" href="#fqfhead" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="duelinghead">
+<h3>DuelingHead<a class="headerlink" href="#duelinghead" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="stochasticduelinghead">
+<h3>StochasticDuelingHead<a class="headerlink" href="#stochasticduelinghead" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="branchinghead">
+<h3>BranchingHead<a class="headerlink" href="#branchinghead" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="regressionhead">
+<h3>RegressionHead<a class="headerlink" href="#regressionhead" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="reparameterizationhead">
+<h3>ReparameterizationHead<a class="headerlink" href="#reparameterizationhead" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="attentionpolicyhead">
+<h3>AttentionPolicyHead<a class="headerlink" href="#attentionpolicyhead" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="multihead">
+<h3>MultiHead<a class="headerlink" href="#multihead" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="independent-normal-dist">
+<h3>independent_normal_dist<a class="headerlink" href="#independent-normal-dist" title="Permalink to this heading">¶</a></h3>
+</section>
+</section>
+<section id="template">
+<h2>Template<a class="headerlink" href="#template" title="Permalink to this heading">¶</a></h2>
+<p>Please refer to <code class="docutils literal notranslate"><span class="pre">ding/model/template</span></code> for more details.</p>
+<section id="dqn">
+<h3>DQN<a class="headerlink" href="#dqn" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="c51dqn">
+<h3>C51DQN<a class="headerlink" href="#c51dqn" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="qrdqn">
+<h3>QRDQN<a class="headerlink" href="#qrdqn" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="iqn">
+<h3>IQN<a class="headerlink" href="#iqn" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="fqf">
+<h3>FQF<a class="headerlink" href="#fqf" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="bdq">
+<h3>BDQ<a class="headerlink" href="#bdq" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="rainbowdqn">
+<h3>RainbowDQN<a class="headerlink" href="#rainbowdqn" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="drqn">
+<h3>DRQN<a class="headerlink" href="#drqn" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="gtrxldqn">
+<h3>GTrXLDQN<a class="headerlink" href="#gtrxldqn" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="pg">
+<h3>PG<a class="headerlink" href="#pg" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="vac">
+<h3>VAC<a class="headerlink" href="#vac" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="dreamervac">
+<h3>DREAMERVAC<a class="headerlink" href="#dreamervac" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="mavac">
+<h3>MAVAC<a class="headerlink" href="#mavac" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="continuousqac">
+<h3>ContinuousQAC<a class="headerlink" href="#continuousqac" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="discreteqac">
+<h3>DiscreteQAC<a class="headerlink" href="#discreteqac" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="continuousmaqac">
+<h3>ContinuousMAQAC<a class="headerlink" href="#continuousmaqac" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="discretemaqac">
+<h3>DiscreteMAQAC<a class="headerlink" href="#discretemaqac" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="qacdist">
+<h3>QACDIST<a class="headerlink" href="#qacdist" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="discretebc">
+<h3>DiscreteBC<a class="headerlink" href="#discretebc" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="continuousbc">
+<h3>ContinuousBC<a class="headerlink" href="#continuousbc" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="pdqn">
+<h3>PDQN<a class="headerlink" href="#pdqn" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="decisiontransformer">
+<h3>DecisionTransformer<a class="headerlink" href="#decisiontransformer" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="languagetransformer">
+<h3>LanguageTransformer<a class="headerlink" href="#languagetransformer" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="mixer">
+<h3>Mixer<a class="headerlink" href="#mixer" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="qmix">
+<h3>QMix<a class="headerlink" href="#qmix" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="coma">
+<h3>COMA<a class="headerlink" href="#coma" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="qtran">
+<h3>QTran<a class="headerlink" href="#qtran" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="wqmix">
+<h3>WQMix<a class="headerlink" href="#wqmix" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="ppg">
+<h3>PPG<a class="headerlink" href="#ppg" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="procedurecloningbfs">
+<h3>ProcedureCloningBFS<a class="headerlink" href="#procedurecloningbfs" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="procedurecloningmcts">
+<h3>ProcedureCloningMCTS<a class="headerlink" href="#procedurecloningmcts" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="acer">
+<h3>ACER<a class="headerlink" href="#acer" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="ngu">
+<h3>NGU<a class="headerlink" href="#ngu" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="bcq">
+<h3>BCQ<a class="headerlink" href="#bcq" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="edac">
+<h3>EDAC<a class="headerlink" href="#edac" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="ebm">
+<h3>EBM<a class="headerlink" href="#ebm" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="autoregressiveebm">
+<h3>AutoregressiveEBM<a class="headerlink" href="#autoregressiveebm" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="vae">
+<h3>VAE<a class="headerlink" href="#vae" title="Permalink to this heading">¶</a></h3>
+</section>
+</section>
+<section id="wrapper">
+<h2>Wrapper<a class="headerlink" href="#wrapper" title="Permalink to this heading">¶</a></h2>
+<p>Please refer to <code class="docutils literal notranslate"><span class="pre">ding/model/wrapper</span></code> for more details.</p>
+<section id="imodelwrapper">
+<h3>IModelWrapper<a class="headerlink" href="#imodelwrapper" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="model-wrap">
+<h3>model_wrap<a class="headerlink" href="#model-wrap" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="register-wrapper">
+<h3>register_wrapper<a class="headerlink" href="#register-wrapper" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="basemodelwrapper">
+<h3>BaseModelWrapper<a class="headerlink" href="#basemodelwrapper" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="argmaxsamplewrapper">
+<h3>ArgmaxSampleWrapper<a class="headerlink" href="#argmaxsamplewrapper" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="multinomialsamplewrapper">
+<h3>MultinomialSampleWrapper<a class="headerlink" href="#multinomialsamplewrapper" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="epsgreedysamplewrapper">
+<h3>EpsGreedySampleWrapper<a class="headerlink" href="#epsgreedysamplewrapper" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="epsgreedymultinomialsamplewrapper">
+<h3>EpsGreedyMultinomialSampleWrapper<a class="headerlink" href="#epsgreedymultinomialsamplewrapper" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="deterministicsamplewrapper">
+<h3>DeterministicSampleWrapper<a class="headerlink" href="#deterministicsamplewrapper" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="reparamsamplewrapper">
+<h3>ReparamSampleWrapper<a class="headerlink" href="#reparamsamplewrapper" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="combinationargmaxsamplewrapper">
+<h3>CombinationArgmaxSampleWrapper<a class="headerlink" href="#combinationargmaxsamplewrapper" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="combinationmultinomialsamplewrapper">
+<h3>CombinationMultinomialSampleWrapper<a class="headerlink" href="#combinationmultinomialsamplewrapper" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="hybridargmaxsamplewrapper">
+<h3>HybridArgmaxSampleWrapper<a class="headerlink" href="#hybridargmaxsamplewrapper" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="hybridepsgreedysamplewrapper">
+<h3>HybridEpsGreedySampleWrapper<a class="headerlink" href="#hybridepsgreedysamplewrapper" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="hybridepsgreedymultinomialsamplewrapper">
+<h3>HybridEpsGreedyMultinomialSampleWrapper<a class="headerlink" href="#hybridepsgreedymultinomialsamplewrapper" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="hybridreparammultinomialsamplewrapper">
+<h3>HybridReparamMultinomialSampleWrapper<a class="headerlink" href="#hybridreparammultinomialsamplewrapper" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="hybriddeterministicargmaxsamplewrapper">
+<h3>HybridDeterministicArgmaxSampleWrapper<a class="headerlink" href="#hybriddeterministicargmaxsamplewrapper" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="actionnoisewrapper">
+<h3>ActionNoiseWrapper<a class="headerlink" href="#actionnoisewrapper" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="targetnetworkwrapper">
+<h3>TargetNetworkWrapper<a class="headerlink" href="#targetnetworkwrapper" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="hiddenstatewrapper">
+<h3>HiddenStateWrapper<a class="headerlink" href="#hiddenstatewrapper" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="transformerinputwrapper">
+<h3>TransformerInputWrapper<a class="headerlink" href="#transformerinputwrapper" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="transformersegmentwrapper">
+<h3>TransformerSegmentWrapper<a class="headerlink" href="#transformersegmentwrapper" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="transformermemorywrapper">
+<h3>TransformerMemoryWrapper<a class="headerlink" href="#transformermemorywrapper" title="Permalink to this heading">¶</a></h3>
+</section>
+</section>
+</section>
+
+
+              </article>
+              
+            </div>
+            <footer>
+  
+  <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+    
+    <a href="policy.html" class="btn btn-neutral float-right" title="ding.policy" accesskey="n"
+      rel="next">Next <img src="../_static/images/chevron-right-blue.svg"
+        class="next-page"></a>
+    
+    
+    <a href="env.html" class="btn btn-neutral" title="ding.envs" accesskey="p"
+      rel="prev"><img src="../_static/images/chevron-right-blue.svg" class="previous-page"> Previous</a>
+    
+  </div>
+  
+
+  <hr>
+
+  <div role="contentinfo">
+    <p>
+      &copy; Copyright 2021, OpenDILab Contributors.
+
+    </p>
+  </div>
+  
+  <div>
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a
+      href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the
+      Docs</a>.
+  </div>
+   
+
+</footer>
+          </div>
+        </div>
+
+        <div class="pytorch-content-right" id="pytorch-content-right">
+          <div class="pytorch-right-menu" id="pytorch-right-menu">
+            <div class="pytorch-side-scroll" id="pytorch-side-scroll-right">
+              <ul>
+<li><a class="reference internal" href="#">ding.model</a><ul>
+<li><a class="reference internal" href="#common">Common</a><ul>
+<li><a class="reference internal" href="#create-model">create_model</a></li>
+<li><a class="reference internal" href="#convencoder">ConvEncoder</a></li>
+<li><a class="reference internal" href="#fcencoder">FCEncoder</a></li>
+<li><a class="reference internal" href="#impalaconvencoder">IMPALAConvEncoder</a></li>
+<li><a class="reference internal" href="#discretehead">DiscreteHead</a></li>
+<li><a class="reference internal" href="#distributionhead">DistributionHead</a></li>
+<li><a class="reference internal" href="#rainbowhead">RainbowHead</a></li>
+<li><a class="reference internal" href="#qrdqnhead">QRDQNHead</a></li>
+<li><a class="reference internal" href="#quantilehead">QuantileHead</a></li>
+<li><a class="reference internal" href="#fqfhead">FQFHead</a></li>
+<li><a class="reference internal" href="#duelinghead">DuelingHead</a></li>
+<li><a class="reference internal" href="#stochasticduelinghead">StochasticDuelingHead</a></li>
+<li><a class="reference internal" href="#branchinghead">BranchingHead</a></li>
+<li><a class="reference internal" href="#regressionhead">RegressionHead</a></li>
+<li><a class="reference internal" href="#reparameterizationhead">ReparameterizationHead</a></li>
+<li><a class="reference internal" href="#attentionpolicyhead">AttentionPolicyHead</a></li>
+<li><a class="reference internal" href="#multihead">MultiHead</a></li>
+<li><a class="reference internal" href="#independent-normal-dist">independent_normal_dist</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#template">Template</a><ul>
+<li><a class="reference internal" href="#dqn">DQN</a></li>
+<li><a class="reference internal" href="#c51dqn">C51DQN</a></li>
+<li><a class="reference internal" href="#qrdqn">QRDQN</a></li>
+<li><a class="reference internal" href="#iqn">IQN</a></li>
+<li><a class="reference internal" href="#fqf">FQF</a></li>
+<li><a class="reference internal" href="#bdq">BDQ</a></li>
+<li><a class="reference internal" href="#rainbowdqn">RainbowDQN</a></li>
+<li><a class="reference internal" href="#drqn">DRQN</a></li>
+<li><a class="reference internal" href="#gtrxldqn">GTrXLDQN</a></li>
+<li><a class="reference internal" href="#pg">PG</a></li>
+<li><a class="reference internal" href="#vac">VAC</a></li>
+<li><a class="reference internal" href="#dreamervac">DREAMERVAC</a></li>
+<li><a class="reference internal" href="#mavac">MAVAC</a></li>
+<li><a class="reference internal" href="#continuousqac">ContinuousQAC</a></li>
+<li><a class="reference internal" href="#discreteqac">DiscreteQAC</a></li>
+<li><a class="reference internal" href="#continuousmaqac">ContinuousMAQAC</a></li>
+<li><a class="reference internal" href="#discretemaqac">DiscreteMAQAC</a></li>
+<li><a class="reference internal" href="#qacdist">QACDIST</a></li>
+<li><a class="reference internal" href="#discretebc">DiscreteBC</a></li>
+<li><a class="reference internal" href="#continuousbc">ContinuousBC</a></li>
+<li><a class="reference internal" href="#pdqn">PDQN</a></li>
+<li><a class="reference internal" href="#decisiontransformer">DecisionTransformer</a></li>
+<li><a class="reference internal" href="#languagetransformer">LanguageTransformer</a></li>
+<li><a class="reference internal" href="#mixer">Mixer</a></li>
+<li><a class="reference internal" href="#qmix">QMix</a></li>
+<li><a class="reference internal" href="#coma">COMA</a></li>
+<li><a class="reference internal" href="#qtran">QTran</a></li>
+<li><a class="reference internal" href="#wqmix">WQMix</a></li>
+<li><a class="reference internal" href="#ppg">PPG</a></li>
+<li><a class="reference internal" href="#procedurecloningbfs">ProcedureCloningBFS</a></li>
+<li><a class="reference internal" href="#procedurecloningmcts">ProcedureCloningMCTS</a></li>
+<li><a class="reference internal" href="#acer">ACER</a></li>
+<li><a class="reference internal" href="#ngu">NGU</a></li>
+<li><a class="reference internal" href="#bcq">BCQ</a></li>
+<li><a class="reference internal" href="#edac">EDAC</a></li>
+<li><a class="reference internal" href="#ebm">EBM</a></li>
+<li><a class="reference internal" href="#autoregressiveebm">AutoregressiveEBM</a></li>
+<li><a class="reference internal" href="#vae">VAE</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#wrapper">Wrapper</a><ul>
+<li><a class="reference internal" href="#imodelwrapper">IModelWrapper</a></li>
+<li><a class="reference internal" href="#model-wrap">model_wrap</a></li>
+<li><a class="reference internal" href="#register-wrapper">register_wrapper</a></li>
+<li><a class="reference internal" href="#basemodelwrapper">BaseModelWrapper</a></li>
+<li><a class="reference internal" href="#argmaxsamplewrapper">ArgmaxSampleWrapper</a></li>
+<li><a class="reference internal" href="#multinomialsamplewrapper">MultinomialSampleWrapper</a></li>
+<li><a class="reference internal" href="#epsgreedysamplewrapper">EpsGreedySampleWrapper</a></li>
+<li><a class="reference internal" href="#epsgreedymultinomialsamplewrapper">EpsGreedyMultinomialSampleWrapper</a></li>
+<li><a class="reference internal" href="#deterministicsamplewrapper">DeterministicSampleWrapper</a></li>
+<li><a class="reference internal" href="#reparamsamplewrapper">ReparamSampleWrapper</a></li>
+<li><a class="reference internal" href="#combinationargmaxsamplewrapper">CombinationArgmaxSampleWrapper</a></li>
+<li><a class="reference internal" href="#combinationmultinomialsamplewrapper">CombinationMultinomialSampleWrapper</a></li>
+<li><a class="reference internal" href="#hybridargmaxsamplewrapper">HybridArgmaxSampleWrapper</a></li>
+<li><a class="reference internal" href="#hybridepsgreedysamplewrapper">HybridEpsGreedySampleWrapper</a></li>
+<li><a class="reference internal" href="#hybridepsgreedymultinomialsamplewrapper">HybridEpsGreedyMultinomialSampleWrapper</a></li>
+<li><a class="reference internal" href="#hybridreparammultinomialsamplewrapper">HybridReparamMultinomialSampleWrapper</a></li>
+<li><a class="reference internal" href="#hybriddeterministicargmaxsamplewrapper">HybridDeterministicArgmaxSampleWrapper</a></li>
+<li><a class="reference internal" href="#actionnoisewrapper">ActionNoiseWrapper</a></li>
+<li><a class="reference internal" href="#targetnetworkwrapper">TargetNetworkWrapper</a></li>
+<li><a class="reference internal" href="#hiddenstatewrapper">HiddenStateWrapper</a></li>
+<li><a class="reference internal" href="#transformerinputwrapper">TransformerInputWrapper</a></li>
+<li><a class="reference internal" href="#transformersegmentwrapper">TransformerSegmentWrapper</a></li>
+<li><a class="reference internal" href="#transformermemorywrapper">TransformerMemoryWrapper</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            </div>
+          </div>
+        </div>
+    </section>
+  </div>
+
+  
+
+
+  
+
+  
+  <script type="text/javascript" id="documentation_options" data-url_root="../"
+    src="../_static/documentation_options.js"></script>
+  <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+  <script src="../_static/doctools.js"></script>
+  <script src="../_static/sphinx_highlight.js"></script>
+  
+
+  
+
+  <script type="text/javascript" src="../_static/js/vendor/popper.min.js"></script>
+  <script type="text/javascript" src="../_static/js/vendor/bootstrap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/list.js/1.5.0/list.min.js"></script>
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+    jQuery(function () {
+      SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+  <!-- Begin Footer -->
+
+  <div class="container-fluid docs-tutorials-resources" id="docs-tutorials-resources">
+  </div>
+
+  <!-- End Footer -->
+
+  <!-- Begin Mobile Menu -->
+
+  <div class="mobile-main-menu">
+    <div class="container-fluid">
+      <div class="container">
+        <div class="mobile-main-menu-header-container">
+          <a class="header-logo" href="https://di-engine-docs.readthedocs.io/en/latest/" aria-label="OpenMMLab"></a>
+          <a class="main-menu-close-button" href="#" data-behavior="close-mobile-menu"></a>
+        </div>
+      </div>
+    </div>
+
+    <div class="mobile-main-menu-links-container">
+      <div class="main-menu">
+        <ul>
+          <li>
+            <a href="https://github.com/opendilab/DI-engine" target="_blank">GitHub</a>
+          </li>
+      </div>
+    </div>
+  </div>
+
+  <!-- End Mobile Menu -->
+
+  <script type="text/javascript" src="../_static/js/vendor/anchor.min.js"></script>
+
+  <script type="text/javascript">
+    $(document).ready(function () {
+      mobileMenu.bind();
+      mobileTOC.bind();
+      pytorchAnchors.bind();
+      sideMenus.bind();
+      scrollToAnchor.bind();
+      highlightNavigation.bind();
+      mainMenuDropdown.bind();
+      filterTags.bind();
+
+      // Add class to links that have code blocks, since we cannot create links in code blocks
+      $("article.pytorch-article a span.pre").each(function (e) {
+        $(this).closest("a").addClass("has-code");
+      });
+    })
+  </script>
+</body>
+
+</html>

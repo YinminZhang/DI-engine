@@ -1,0 +1,613 @@
+
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en">
+<!--<![endif]-->
+
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>FAQ &mdash; DI-engine 0.1.0 documentation</title>
+  
+
+  <link rel="shortcut icon" href="../_static/images/favicon.ico" />
+  
+  
+
+  
+
+  
+  
+  
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!-- <link rel="stylesheet" href="../_static/pygments.css" type="text/css" /> -->
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/style.css" type="text/css" />
+  <link rel="index" title="Index" href="../genindex.html" />
+  <link rel="search" title="Search" href="../search.html" />
+  <link rel="next" title="强化学习基础概念介绍" href="../10_concepts/index_zh.html" />
+  <link rel="prev" title="league.payoff" href="../05_api_doc/league/payoff.html" />
+    <link href="../_static/css/style.css" rel="stylesheet" type="text/css">
+
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+  <script>
+    MathJax = {
+        chtml: {
+            scale: 1,
+            minScale: 1,
+        },
+        svg: {
+            scale: 1,
+            minScale: 1,
+        }
+    }
+</script>
+
+  <!-- Preload the theme fonts -->
+
+<link rel="preload" href="../_static/fonts/FreightSans/freight-sans-book.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/FreightSans/freight-sans-medium.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/IBMPlexMono/IBMPlexMono-Medium.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/FreightSans/freight-sans-bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/FreightSans/freight-sans-medium-italic.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/IBMPlexMono/IBMPlexMono-SemiBold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+
+<!-- Preload the katex fonts -->
+
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Math-Italic.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Main-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Main-Bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size1-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size4-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size2-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size3-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Caligraphic-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.2/css/all.css"
+    integrity="sha384-vSIIfh2YWi9wW0r9iZe7RJPrKwp6bG+s9QZMoITbCckVJqGCCRhc+ccxNcdpHuYu" crossorigin="anonymous">
+</head>
+
+<div class="container-fluid header-holder tutorials-header" id="header-holder">
+  <div class="container">
+    <div class="header-container">
+      <a class="header-logo" href="https://di-engine-docs.readthedocs.io/en/latest/"
+        aria-label="OpenMMLab"></a>
+
+      <div class="main-menu">
+        <ul>
+          <li>
+            <a href="https://github.com/opendilab/DI-engine" target="_blank">GitHub</a>
+          </li>
+          <li >
+            <div id="resourcesDropdownButton" data-toggle="resources-dropdown" class="resources-dropdown">
+              <a
+                class="resource-option with-down-arrow">
+                OpenDILab
+              </a>
+              <div class="resources-dropdown-menu">
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/DI-engine" target="_blank">
+                  <span class="dropdown-title">DI-engine </span>
+                  <p>OpenDILab Decision AI Engine</p>
+                </a>
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/DI-star" target="_blank">
+                  <span class="dropdown-title">DI-star </span>
+                  <p>OpenDILab Decision AI in StarCraftII</p>
+                </a>
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/DI-drive" target="_blank">
+                  <span class="dropdown-title">DI-drive </span>
+                  <p>OpenDILab Auto-driving platform</p>
+                </a>
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/GoBigger" target="_blank">
+                  <span class="dropdown-title">GoBigger </span>
+                  <p>OpenDILab Multi-Agent Environment</p>
+                </a>
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/DI-smartcross" target="_blank">
+                  <span class="dropdown-title">DI-smartcross </span>
+                  <p>Decision Intelligence Platform for Traffic Crossing Signal Control</p>
+                </a>
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/DI-treetensor" target="_blank">
+                  <span class="dropdown-title">DI-treetensor </span>
+                  <p>Tree Nested PyTorch Tensor Lib</p>
+                </a>
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/DI-sheep" target="_blank">
+                  <span class="dropdown-title">DI-sheep </span>
+                  <p>Deep Reinforcement Learning + 3 Tiles Game</p>
+                </a>
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/awesome-model-based-RL" target="_blank">
+                  <span class="dropdown-title">awesome-model-based-RL </span>
+                  <p>A curated list of awesome model based RL resources (continually updated)</p>
+                </a>
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/awesome-decision-transformer" target="_blank">
+                  <span class="dropdown-title">awesome-decision-transformer </span>
+                  <p>A curated list of Decision Transformer resources (continually updated)</p>
+                </a>
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/awesome-exploration-rl" target="_blank">
+                  <span class="dropdown-title">awesome-exploration-rl </span>
+                  <p>A curated list of awesome exploration RL resources (continually updated)</p>
+                </a>
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/awesome-multi-modal-reinforcement-learning" target="_blank">
+                  <span class="dropdown-title">awesome-multi-modal-reinforcement-learning </span>
+                  <p>A curated list of Multi-Modal Reinforcement Learning resources (continually updated)</p>
+                </a>
+              </div>
+          </li>
+        </ul>
+      </div>
+
+      <a class="main-menu-open-button" href="#" data-behavior="open-mobile-menu"></a>
+    </div>
+  </div>
+</div>
+
+<body class="pytorch-body">
+
+   
+
+  
+
+  <div class="table-of-contents-link-wrapper">
+    <span>Table of Contents</span>
+    <a href="#" class="toggle-table-of-contents" data-behavior="toggle-table-of-contents"></a>
+  </div>
+
+  <nav data-toggle="wy-nav-shift" class="pytorch-left-menu" id="pytorch-left-menu">
+    <div class="pytorch-side-scroll">
+      <div class="pytorch-menu pytorch-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        <div class="pytorch-left-menu-search">
+          
+
+          
+          
+          
+          
+
+          
+
+
+
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search Docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        
+        
+        
+        
+        
+        <p class="caption" role="heading"><span class="caption-text">用户指南</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../00_intro/index_zh.html">DI-engine 简介</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../01_quickstart/index_zh.html">快速开始</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../02_algo/index_zh.html">强化学习算法分类</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../03_system/index_zh.html">系统设计</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../04_best_practice/index_zh.html">最佳实践</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../05_api_doc/index.html">API Doc</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">FAQ</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">强化学习教程</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../10_concepts/index_zh.html">强化学习基础概念介绍</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../11_dizoo/index_zh.html">从 DI-zoo 开始学习</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../12_policies/index_zh.html">强化学习算法</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../13_envs/index_zh.html">强化学习环境示例</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">开发者规范</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../20_spec/index_zh.html">代码规范</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../21_code_style/index_zh.html">代码风格指南</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../22_test/index_zh.html">单元测试指南</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../23_visual/index_zh.html">图像与可视化</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../24_cooperation/index_zh.html">Github 合作模式</a></li>
+</ul>
+
+        
+        
+      </div>
+    </div>
+  </nav>
+
+  <div class="pytorch-container">
+    <div class="pytorch-page-level-bar" id="pytorch-page-level-bar">
+      <div class="pytorch-breadcrumbs-wrapper">
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="pytorch-breadcrumbs">
+    
+      <li>
+        <a href="../index_zh.html">
+            Docs
+        </a> &gt;
+      </li>
+
+        
+      <li>FAQ</li>
+    
+    
+      <li class="pytorch-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/06_faq/index_zh.rst.txt" rel="nofollow"><img src="../_static/images/view-page-source-icon.svg"></a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+</div>
+      </div>
+
+      <div class="pytorch-shortcuts-wrapper" id="pytorch-shortcuts-wrapper">
+        Shortcuts
+      </div>
+    </div>
+
+    <section data-toggle="wy-nav-shift" id="pytorch-content-wrap" class="pytorch-content-wrap">
+      <div class="pytorch-content-left">
+        
+          <div class="rst-content">
+            
+            <div role="main" class="main-content" itemscope="itemscope" itemtype="http://schema.org/Article">
+              <article itemprop="articleBody" id="pytorch-article" class="pytorch-article">
+                
+  <section id="faq">
+<h1>FAQ<a class="headerlink" href="#faq" title="Permalink to this heading">¶</a></h1>
+<section id="frequently-asked-questions">
+<h2>Frequently Asked Questions<a class="headerlink" href="#frequently-asked-questions" title="Permalink to this heading">¶</a></h2>
+<nav class="contents local" id="contents">
+<ul class="simple">
+<li><p><a class="reference internal" href="#q1-warning" id="id6">Q1. 关于使用时出现的warning</a></p></li>
+<li><p><a class="reference internal" href="#q2-di-engine-cli" id="id7">Q2. 安装之后无法使用DI-engine命令行工具(CLI)</a></p></li>
+<li><p><a class="reference internal" href="#q3" id="id8">Q3: 安装时出现”没有权限”相关错误</a></p></li>
+<li><p><a class="reference internal" href="#q4-syncsubprocessenvmanager" id="id9">Q4: 如何设置SyncSubprocessEnvManager的相关运行参数</a></p></li>
+<li><p><a class="reference internal" href="#q5" id="id10">Q5: 如何调整学习率</a></p></li>
+<li><p><a class="reference internal" href="#q6-evaluator" id="id11">Q6: 如何理解打印出的 [EVALUATOR] 信息</a></p></li>
+<li><p><a class="reference internal" href="#q7-di-engine-config-config" id="id12">Q7: DI-engine 里的 config 文件有相关说明吗？如何在 config 中设置控制训练停止的相关字段？</a></p></li>
+<li><p><a class="reference internal" href="#q8-di-engine" id="id13">Q8: DI-engine 安装相关问题。</a></p></li>
+<li><p><a class="reference internal" href="#q9-di-engine-episode" id="id14">Q9: DI-engine 中的 episode 指什么呢？</a></p></li>
+<li><p><a class="reference internal" href="#q10-di-engine-selfplay" id="id15">Q10: DI-engine 支持 selfplay 机制吗？</a></p></li>
+</ul>
+</nav>
+<hr class="docutils" />
+<section id="q1-warning">
+<h3>Q1. 关于使用时出现的warning<a class="headerlink" href="#q1-warning" title="Permalink to this heading">¶</a></h3>
+<p><strong>A1:</strong></p>
+<p>对于运行DI-engine时命令行中显示的import linlink, ceph, memcache, redis的相关warning，一般使用者忽略即可，DI-engine会在import时自动进行寻找相应的替代库或代码实现。</p>
+</section>
+<section id="q2-di-engine-cli">
+<h3>Q2. 安装之后无法使用DI-engine命令行工具(CLI)<a class="headerlink" href="#q2-di-engine-cli" title="Permalink to this heading">¶</a></h3>
+<p><strong>A2:</strong></p>
+<ul class="simple">
+<li><p>部分运行环境使用pip安装时指定 <code class="docutils literal notranslate"><span class="pre">-e</span></code> 选项会导致无法使用CLI，一般非开发者无需指定该选项，去掉该选项重新安装即可</p></li>
+<li><p>部分运行环境会将CLI安装在用户目录下，需要验证CLI的安装目录是否在使用者的环境变量中 （如 linux 的 <code class="docutils literal notranslate"><span class="pre">$PATH</span></code> 中）</p></li>
+</ul>
+</section>
+<section id="q3">
+<h3>Q3: 安装时出现”没有权限”相关错误<a class="headerlink" href="#q3" title="Permalink to this heading">¶</a></h3>
+<p><strong>A3:</strong></p>
+<dl class="simple">
+<dt>由于某些运行环境中缺少相应权限，pip安装时可能出现”没有权限”(Permission denied)，具体原因及解决方法如下：</dt><dd><ul class="simple">
+<li><p>pip添加 <code class="docutils literal notranslate"><span class="pre">--user</span></code> 选项，安装在用户目录下</p></li>
+<li><p>将仓库根目录下的 <code class="docutils literal notranslate"><span class="pre">.git</span></code> 文件夹移动出去，执行pip安装命令，再将其移动回来，具体原因可参见  <a class="reference external" href="https://github.com/pypa/pip/issues/4525">https://github.com/pypa/pip/issues/4525</a></p></li>
+</ul>
+</dd>
+</dl>
+</section>
+<section id="q4-syncsubprocessenvmanager">
+<h3>Q4: 如何设置SyncSubprocessEnvManager的相关运行参数<a class="headerlink" href="#q4-syncsubprocessenvmanager" title="Permalink to this heading">¶</a></h3>
+<p><strong>A4:</strong></p>
+<p>在配置文件的env字段添加manager字段，可以指定是否使用shared_memory，多进程multiprocessing启动的上下文，下面的代码提供了一个简单样例，详细的参数信息可参考 <code class="docutils literal notranslate"><span class="pre">SyncSubprocessEnvManager</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">config</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+    <span class="n">env</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+        <span class="n">manager</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">shared_memory</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="q5">
+<h3>Q5: 如何调整学习率<a class="headerlink" href="#q5" title="Permalink to this heading">¶</a></h3>
+<p><strong>A5:</strong></p>
+<p>在相应算法的入口添加 <code class="docutils literal notranslate"><span class="pre">lr_scheduler</span></code> 代码，可以通过调用 <code class="docutils literal notranslate"><span class="pre">torch.optim.lr_scheduler</span></code> （参考： <a class="reference external" href="https://pytorch.org/docs/stable/optim.html">https://pytorch.org/docs/stable/optim.html</a>）模块来调整学习率，并且在模型优化更新之后使用 <code class="docutils literal notranslate"><span class="pre">scheduler.step()</span></code> 对学习率进行更新。
+下面代码提供一个简单的案例，具体可参考demo: <a class="reference external" href="https://github.com/opendilab/DI-engine/commit/9cad6575e5c00036aba6419f95cdce0e7342630f">https://github.com/opendilab/DI-engine/commit/9cad6575e5c00036aba6419f95cdce0e7342630f</a>。</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">torch.optim.lr_scheduler</span> <span class="kn">import</span> <span class="n">LambdaLR</span>
+
+<span class="o">...</span>
+
+<span class="c1"># Set up RL Policy</span>
+<span class="n">policy</span> <span class="o">=</span> <span class="n">DDPGPolicy</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">policy</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">)</span>
+<span class="c1"># Set up lr_scheduler, the optimizer attribute will be different in different policy.</span>
+<span class="c1"># For example, in DDPGPolicy the attribute is &#39;optimizer_actor&#39;, but in DQNPolicy the attribute is &#39;optimizer&#39;.</span>
+<span class="n">lr_scheduler</span> <span class="o">=</span> <span class="n">LambdaLR</span><span class="p">(</span>
+    <span class="n">policy</span><span class="o">.</span><span class="n">learn_mode</span><span class="o">.</span><span class="n">get_attribute</span><span class="p">(</span><span class="s1">&#39;optimizer_actor&#39;</span><span class="p">),</span> <span class="n">lr_lambda</span><span class="o">=</span><span class="k">lambda</span> <span class="n">iters</span><span class="p">:</span> <span class="nb">min</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.5</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">iters</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="o">...</span>
+
+<span class="c1"># Train</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">policy</span><span class="o">.</span><span class="n">learn</span><span class="o">.</span><span class="n">update_per_collect</span><span class="p">):</span>
+        <span class="o">...</span>
+        <span class="n">learner</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="n">train_data</span><span class="p">,</span> <span class="n">collector</span><span class="o">.</span><span class="n">envstep</span><span class="p">)</span>
+        <span class="n">lr_scheduler</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>学习率变化曲线如图所示</p>
+<a class="reference internal image-reference" href="../_images/Q5_lr_scheduler.png"><img alt="../_images/Q5_lr_scheduler.png" class="align-center" src="../_images/Q5_lr_scheduler.png" style="height: 250px;" /></a>
+</section>
+<section id="q6-evaluator">
+<h3>Q6: 如何理解打印出的 [EVALUATOR] 信息<a class="headerlink" href="#q6-evaluator" title="Permalink to this heading">¶</a></h3>
+<p><strong>A6:</strong></p>
+<p>我们在 <a class="reference external" href="https://github.com/opendilab/DI-engine/blob/main/ding/worker/collector/interaction_serial_evaluator.py#L253">interaction_serial_evaluator.py</a> ，打印出 <code class="docutils literal notranslate"><span class="pre">evaluator</span></code> 的评估信息，
+包括 <code class="docutils literal notranslate"><span class="pre">env</span></code>, <code class="docutils literal notranslate"><span class="pre">final</span> <span class="pre">reward</span></code>, <code class="docutils literal notranslate"><span class="pre">current</span> <span class="pre">episode</span></code> 分别代表当前已完成局 (<code class="docutils literal notranslate"><span class="pre">timestep.done=True</span></code>) 对应的环境索引 (<code class="docutils literal notranslate"><span class="pre">env_id</span></code>), 当前已完成局游戏的奖励， 以及它是 <code class="docutils literal notranslate"><span class="pre">evaluator</span></code> 评估的第几局游戏。
+一个典型的 evaluator log 信息如下图所示：</p>
+<a class="reference internal image-reference" href="../_images/Q6_evaluator_info.png"><img alt="../_images/Q6_evaluator_info.png" class="align-center" src="../_images/Q6_evaluator_info.png" style="height: 250px;" /></a>
+<p>在某些情况下，<code class="docutils literal notranslate"><span class="pre">evaluator</span></code> 中的不同环境可能会收集不同长度的游戏局。 例如，假设我们通过 <code class="docutils literal notranslate"><span class="pre">evaluator</span></code> 收集 16 局游戏，但只有 5 个评估环境 (<code class="docutils literal notranslate"><span class="pre">eval_env</span></code>)，即在 config 中设置 <code class="docutils literal notranslate"><span class="pre">n_evaluator_episode=16,</span> <span class="pre">evaluator_env_num=5</span></code>，
+我们如果不对每个评估环境的评估总局数进行限制，很可能会得到许多步长较短的游戏局，这样一来，这次评估阶段得到的平均奖励就会有偏差，不能完全反映当前 policy 的性能 (只反映了在步数较短的游戏局上的性能)。</p>
+<p>我们通过使用 <a class="reference external" href="https://github.com/opendilab/DI-engine/blob/main/ding/worker/collector/base_serial_evaluator.py#L78">VectorEvalMonitor</a> 类来缓解这个问题。
+在这个类中，我们在 <a class="reference external" href="https://github.com/opendilab/DI-engine/blob/main/ding/worker/collector/base_serial_evaluator.py#L103">这里</a> 平均指定每个 <code class="docutils literal notranslate"><span class="pre">eval_env</span></code> 需要评估的局数，
+例如，如果设置 <code class="docutils literal notranslate"><span class="pre">n_evaluator_episode=16</span></code> 和 <code class="docutils literal notranslate"><span class="pre">evaluator_env_num=8</span></code>，那么每个 <code class="docutils literal notranslate"><span class="pre">eval_env</span></code> 只有 2 局将被添加到统计量中。
+关于 <code class="docutils literal notranslate"><span class="pre">VectorEvalMonitor</span></code> 每个方法的具体含义，请参考类 <a class="reference external" href="https://github.com/opendilab/DI-engine/blob/main/ding/worker/collector/base_serial_evaluator.py#L78">VectorEvalMonitor</a> 的注释。</p>
+<p>值得注意的是，当 evaluator 的某一个 <code class="docutils literal notranslate"><span class="pre">eval_env</span></code> 完成评估数量为 <code class="docutils literal notranslate"><span class="pre">each_env_episode[i]</span></code> 的游戏局后，由于环境的 reset 是由
+<a class="reference external" href="https://github.com/opendilab/DI-engine/blob/main/ding/envs/env_manager/subprocess_env_manager.py">env_manager</a>  自动控制的，它还会继续运行下去, 除非整个评估阶段终止。
+我们是用 <code class="docutils literal notranslate"><span class="pre">VectorEvalMonitor</span></code> 控制评估阶段的终止，只有当
+<a class="reference external" href="https://github.com/opendilab/DI-engine/blob/main/ding/worker/collector/interaction_serial_evaluator.py#L224">eval_monitor.is_finished()</a> 为True时，
+即 evaluator 完成了所有的评估任务后 (在所有 <code class="docutils literal notranslate"><span class="pre">eval_env</span></code> 上一共评估了 <code class="docutils literal notranslate"><span class="pre">n_evaluator_episode</span></code> 局)，才会退出本次评估, 所以可能会出现某个 <code class="docutils literal notranslate"><span class="pre">eval_env</span></code> 在完成它自己的评估数量为 <code class="docutils literal notranslate"><span class="pre">each_env_episode[i]</span></code> 的游戏局后，其对应的log信息仍然重复出现的情况,
+用户不必担心这些重复的 logs，它们不会对评估结果产生不好的影响。</p>
+</section>
+<section id="q7-di-engine-config-config">
+<h3>Q7: DI-engine 里的 config 文件有相关说明吗？如何在 config 中设置控制训练停止的相关字段？<a class="headerlink" href="#q7-di-engine-config-config" title="Permalink to this heading">¶</a></h3>
+<p><strong>A7:</strong></p>
+<p>关于 DI-engine 配置文件系统详细介绍可见 <a class="reference external" href="https://di-engine-docs.readthedocs.io/zh_CN/latest/03_system/config_zh.html">配置文件系统文档</a> 。DI-engine 中一般来说有三种停止设置：</p>
+<ul class="simple">
+<li><p>到达预设置的 <code class="docutils literal notranslate"><span class="pre">stop</span> <span class="pre">value</span></code> （config 中修改），即 <code class="docutils literal notranslate"><span class="pre">evaluation</span> <span class="pre">episode</span> <span class="pre">reward</span> <span class="pre">mean</span></code> 大于等于 <code class="docutils literal notranslate"><span class="pre">stop</span> <span class="pre">value</span></code></p></li>
+<li><p>到达预设置的最大环境交互步数（ <code class="docutils literal notranslate"><span class="pre">env</span> <span class="pre">step</span></code> ），训练入口中修改</p>
+<ul>
+<li><p>样例 1： <a class="reference external" href="https://github.com/opendilab/DI-engine/blob/main/ding/entry/serial_entry.py#L24">https://github.com/opendilab/DI-engine/blob/main/ding/entry/serial_entry.py#L24</a></p></li>
+<li><p>样例 2： <a class="reference external" href="https://github.com/opendilab/DI-engine/blob/main/ding/example/sac.py#L41">https://github.com/opendilab/DI-engine/blob/main/ding/example/sac.py#L41</a> 设置次数的 max_env_step</p></li>
+</ul>
+</li>
+<li><p>到达预设置的最大训练迭代数（ <code class="docutils literal notranslate"><span class="pre">train</span> <span class="pre">iter</span></code> ），训练入口中修改</p>
+<ul>
+<li><p>样例 1： <a class="reference external" href="https://github.com/opendilab/DI-engine/blob/main/ding/entry/serial_entry.py#L23">https://github.com/opendilab/DI-engine/blob/main/ding/entry/serial_entry.py#L23</a></p></li>
+<li><p>样例 2： <a class="reference external" href="https://github.com/opendilab/DI-engine/blob/main/ding/example/sac.py#L41">https://github.com/opendilab/DI-engine/blob/main/ding/example/sac.py#L41</a></p></li>
+</ul>
+</li>
+</ul>
+<p>另外，关于配置文件具体字段的介绍，可以参考各个类的 default config 部分的注释，例如</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/opendilab/DI-engine/blob/main/ding/policy/dqn.py#L85">DQN default config</a></p></li>
+<li><p><a class="reference external" href="https://github.com/opendilab/DI-engine/blob/main/ding/policy/sac.py#L64">SAC default config</a></p></li>
+</ul>
+<p>强化学习相关配置文件较为复杂，如果还有不懂的细节欢迎大家随时提问！</p>
+</section>
+<section id="q8-di-engine">
+<h3>Q8: DI-engine 安装相关问题。<a class="headerlink" href="#q8-di-engine" title="Permalink to this heading">¶</a></h3>
+<ul>
+<li><p><strong>Q8-1</strong> 能否用 pip 安装 DI-engine？</p>
+<p><strong>A8-1:</strong></p>
+<p>可以，直接使用 <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">DI-engine</span></code> 命令即可，具体可见 <a class="reference external" href="https://di-engine-docs.readthedocs.io/zh_CN/latest/01_quickstart/installation_zh.html#id3">安装说明文档-安装发布版本</a> 。</p>
+</li>
+<li><p><strong>Q8-2</strong> DI-engine 安装时会自动安装 PyTorch 嘛？如果电脑本身带有 PyTorch 会怎么样呢？</p>
+<p><strong>A8-2:</strong></p>
+<p>如果当前环境之前已经安装过 PyTorch，安装 DI-engine 时检查 PyTorch 版本符合要求的话，就会直接安装其他的依赖包；如果之前没有安装，DI-engine 会默认装上 cpu 版的 PyTorch 最好自己先安装 PyTorch 的合适版本，不然 di-engine 会默认装上 cpu 版的 PyTorch，具体的安装步骤可参考 <a class="reference external" href="https://di-engine-docs.readthedocs.io/zh_CN/latest/index_zh.html">安装说明文档</a> 。</p>
+</li>
+<li><p><strong>Q8-3</strong> DI-engine 对应的 gym 版本是？是否不能适配最新 gym 版本？</p>
+<p><strong>A8-3:</strong></p>
+<p>目前 DI-engine 对应到 gym 版本 0.25.1（2023.5.5），对于 DI-engine 适配的各个依赖库版本问题，可以参考 <a class="reference external" href="https://github.com/opendilab/DI-engine/blob/main/setup.py#L53">setup.py</a> 文件。</p>
+</li>
+<li><p><strong>Q8-4</strong> 如何从 Github 源码安装最新的 DI-engine 开发版本？</p>
+<p><strong>A8-4:</strong></p>
+<p>可以从 Github clone 下来，进入到相应文件夹里 <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-e</span> <span class="pre">.</span></code>，如：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">opendilab</span><span class="o">/</span><span class="n">DI</span><span class="o">-</span><span class="n">engine</span><span class="o">.</span><span class="n">git</span>
+<span class="n">cd</span> <span class="n">DI</span><span class="o">-</span><span class="n">engine</span>
+<span class="n">pip</span> <span class="n">install</span> <span class="o">.</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="q9-di-engine-episode">
+<h3>Q9: DI-engine 中的 episode 指什么呢？<a class="headerlink" href="#q9-di-engine-episode" title="Permalink to this heading">¶</a></h3>
+<p><strong>A9:</strong></p>
+<p>episode 这个词的中文翻译比较生硬，并不是强化学习的原创概念，它来自于游戏，类似“关卡”的意思，指智能体开始玩游戏到通关或者 game over 的过程，本质是指跟环境交互的一个完整周期，比如一局游戏一盘围棋这样，或许翻译为“集”or“局”比较好。</p>
+</section>
+<section id="q10-di-engine-selfplay">
+<h3>Q10: DI-engine 支持 selfplay 机制吗？<a class="headerlink" href="#q10-di-engine-selfplay" title="Permalink to this heading">¶</a></h3>
+<p><strong>A10:</strong></p>
+<p>支持的，最简单的例子可以参考 <code class="docutils literal notranslate"><span class="pre">dizoo</span></code> 中的 <a class="reference external" href="https://github.com/opendilab/DI-engine/tree/main/dizoo/league_demo">league demo</a> 和 <a class="reference external" href="https://github.com/opendilab/DI-engine/tree/main/dizoo/slime_volley">slime volleyball</a> 。</p>
+</section>
+</section>
+</section>
+
+
+              </article>
+              
+            </div>
+            <footer>
+  
+  <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+    
+    <a href="../10_concepts/index_zh.html" class="btn btn-neutral float-right" title="强化学习基础概念介绍" accesskey="n"
+      rel="next">Next <img src="../_static/images/chevron-right-blue.svg"
+        class="next-page"></a>
+    
+    
+    <a href="../05_api_doc/league/payoff.html" class="btn btn-neutral" title="league.payoff" accesskey="p"
+      rel="prev"><img src="../_static/images/chevron-right-blue.svg" class="previous-page"> Previous</a>
+    
+  </div>
+  
+
+  <hr>
+
+  <div role="contentinfo">
+    <p>
+      &copy; Copyright 2021, OpenDILab Contributors.
+
+    </p>
+  </div>
+  
+  <div>
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a
+      href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the
+      Docs</a>.
+  </div>
+   
+
+</footer>
+          </div>
+        </div>
+
+        <div class="pytorch-content-right" id="pytorch-content-right">
+          <div class="pytorch-right-menu" id="pytorch-right-menu">
+            <div class="pytorch-side-scroll" id="pytorch-side-scroll-right">
+              <ul>
+<li><a class="reference internal" href="#">FAQ</a><ul>
+<li><a class="reference internal" href="#frequently-asked-questions">Frequently Asked Questions</a><ul>
+<li><a class="reference internal" href="#q1-warning">Q1. 关于使用时出现的warning</a></li>
+<li><a class="reference internal" href="#q2-di-engine-cli">Q2. 安装之后无法使用DI-engine命令行工具(CLI)</a></li>
+<li><a class="reference internal" href="#q3">Q3: 安装时出现”没有权限”相关错误</a></li>
+<li><a class="reference internal" href="#q4-syncsubprocessenvmanager">Q4: 如何设置SyncSubprocessEnvManager的相关运行参数</a></li>
+<li><a class="reference internal" href="#q5">Q5: 如何调整学习率</a></li>
+<li><a class="reference internal" href="#q6-evaluator">Q6: 如何理解打印出的 [EVALUATOR] 信息</a></li>
+<li><a class="reference internal" href="#q7-di-engine-config-config">Q7: DI-engine 里的 config 文件有相关说明吗？如何在 config 中设置控制训练停止的相关字段？</a></li>
+<li><a class="reference internal" href="#q8-di-engine">Q8: DI-engine 安装相关问题。</a></li>
+<li><a class="reference internal" href="#q9-di-engine-episode">Q9: DI-engine 中的 episode 指什么呢？</a></li>
+<li><a class="reference internal" href="#q10-di-engine-selfplay">Q10: DI-engine 支持 selfplay 机制吗？</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            </div>
+          </div>
+        </div>
+    </section>
+  </div>
+
+  
+
+
+  
+
+  
+  <script type="text/javascript" id="documentation_options" data-url_root="../"
+    src="../_static/documentation_options.js"></script>
+  <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+  <script src="../_static/doctools.js"></script>
+  <script src="../_static/sphinx_highlight.js"></script>
+  
+
+  
+
+  <script type="text/javascript" src="../_static/js/vendor/popper.min.js"></script>
+  <script type="text/javascript" src="../_static/js/vendor/bootstrap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/list.js/1.5.0/list.min.js"></script>
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+    jQuery(function () {
+      SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+  <!-- Begin Footer -->
+
+  <div class="container-fluid docs-tutorials-resources" id="docs-tutorials-resources">
+  </div>
+
+  <!-- End Footer -->
+
+  <!-- Begin Mobile Menu -->
+
+  <div class="mobile-main-menu">
+    <div class="container-fluid">
+      <div class="container">
+        <div class="mobile-main-menu-header-container">
+          <a class="header-logo" href="https://di-engine-docs.readthedocs.io/en/latest/" aria-label="OpenMMLab"></a>
+          <a class="main-menu-close-button" href="#" data-behavior="close-mobile-menu"></a>
+        </div>
+      </div>
+    </div>
+
+    <div class="mobile-main-menu-links-container">
+      <div class="main-menu">
+        <ul>
+          <li>
+            <a href="https://github.com/opendilab/DI-engine" target="_blank">GitHub</a>
+          </li>
+      </div>
+    </div>
+  </div>
+
+  <!-- End Mobile Menu -->
+
+  <script type="text/javascript" src="../_static/js/vendor/anchor.min.js"></script>
+
+  <script type="text/javascript">
+    $(document).ready(function () {
+      mobileMenu.bind();
+      mobileTOC.bind();
+      pytorchAnchors.bind();
+      sideMenus.bind();
+      scrollToAnchor.bind();
+      highlightNavigation.bind();
+      mainMenuDropdown.bind();
+      filterTags.bind();
+
+      // Add class to links that have code blocks, since we cannot create links in code blocks
+      $("article.pytorch-article a span.pre").each(function (e) {
+        $(this).closest("a").addClass("has-code");
+      });
+    })
+  </script>
+</body>
+
+</html>

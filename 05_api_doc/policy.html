@@ -1,0 +1,665 @@
+
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en">
+<!--<![endif]-->
+
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>ding.policy &mdash; DI-engine 0.1.0 documentation</title>
+  
+
+  <link rel="shortcut icon" href="../_static/images/favicon.ico" />
+  
+  
+
+  
+
+  
+  
+  
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!-- <link rel="stylesheet" href="../_static/pygments.css" type="text/css" /> -->
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/style.css" type="text/css" />
+  <link rel="index" title="Index" href="../genindex.html" />
+  <link rel="search" title="Search" href="../search.html" />
+  <link rel="next" title="ding.rl_utils" href="rl_utils.html" />
+  <link rel="prev" title="ding.model" href="model.html" />
+    <link href="../_static/css/style.css" rel="stylesheet" type="text/css">
+
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+  <script>
+    MathJax = {
+        chtml: {
+            scale: 1,
+            minScale: 1,
+        },
+        svg: {
+            scale: 1,
+            minScale: 1,
+        }
+    }
+</script>
+
+  <!-- Preload the theme fonts -->
+
+<link rel="preload" href="../_static/fonts/FreightSans/freight-sans-book.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/FreightSans/freight-sans-medium.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/IBMPlexMono/IBMPlexMono-Medium.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/FreightSans/freight-sans-bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/FreightSans/freight-sans-medium-italic.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/IBMPlexMono/IBMPlexMono-SemiBold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+
+<!-- Preload the katex fonts -->
+
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Math-Italic.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Main-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Main-Bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size1-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size4-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size2-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size3-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Caligraphic-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.2/css/all.css"
+    integrity="sha384-vSIIfh2YWi9wW0r9iZe7RJPrKwp6bG+s9QZMoITbCckVJqGCCRhc+ccxNcdpHuYu" crossorigin="anonymous">
+</head>
+
+<div class="container-fluid header-holder tutorials-header" id="header-holder">
+  <div class="container">
+    <div class="header-container">
+      <a class="header-logo" href="https://di-engine-docs.readthedocs.io/en/latest/"
+        aria-label="OpenMMLab"></a>
+
+      <div class="main-menu">
+        <ul>
+          <li>
+            <a href="https://github.com/opendilab/DI-engine" target="_blank">GitHub</a>
+          </li>
+          <li >
+            <div id="resourcesDropdownButton" data-toggle="resources-dropdown" class="resources-dropdown">
+              <a
+                class="resource-option with-down-arrow">
+                OpenDILab
+              </a>
+              <div class="resources-dropdown-menu">
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/DI-engine" target="_blank">
+                  <span class="dropdown-title">DI-engine </span>
+                  <p>OpenDILab Decision AI Engine</p>
+                </a>
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/DI-star" target="_blank">
+                  <span class="dropdown-title">DI-star </span>
+                  <p>OpenDILab Decision AI in StarCraftII</p>
+                </a>
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/DI-drive" target="_blank">
+                  <span class="dropdown-title">DI-drive </span>
+                  <p>OpenDILab Auto-driving platform</p>
+                </a>
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/GoBigger" target="_blank">
+                  <span class="dropdown-title">GoBigger </span>
+                  <p>OpenDILab Multi-Agent Environment</p>
+                </a>
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/DI-smartcross" target="_blank">
+                  <span class="dropdown-title">DI-smartcross </span>
+                  <p>Decision Intelligence Platform for Traffic Crossing Signal Control</p>
+                </a>
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/DI-treetensor" target="_blank">
+                  <span class="dropdown-title">DI-treetensor </span>
+                  <p>Tree Nested PyTorch Tensor Lib</p>
+                </a>
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/DI-sheep" target="_blank">
+                  <span class="dropdown-title">DI-sheep </span>
+                  <p>Deep Reinforcement Learning + 3 Tiles Game</p>
+                </a>
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/awesome-model-based-RL" target="_blank">
+                  <span class="dropdown-title">awesome-model-based-RL </span>
+                  <p>A curated list of awesome model based RL resources (continually updated)</p>
+                </a>
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/awesome-decision-transformer" target="_blank">
+                  <span class="dropdown-title">awesome-decision-transformer </span>
+                  <p>A curated list of Decision Transformer resources (continually updated)</p>
+                </a>
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/awesome-exploration-rl" target="_blank">
+                  <span class="dropdown-title">awesome-exploration-rl </span>
+                  <p>A curated list of awesome exploration RL resources (continually updated)</p>
+                </a>
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/awesome-multi-modal-reinforcement-learning" target="_blank">
+                  <span class="dropdown-title">awesome-multi-modal-reinforcement-learning </span>
+                  <p>A curated list of Multi-Modal Reinforcement Learning resources (continually updated)</p>
+                </a>
+              </div>
+          </li>
+        </ul>
+      </div>
+
+      <a class="main-menu-open-button" href="#" data-behavior="open-mobile-menu"></a>
+    </div>
+  </div>
+</div>
+
+<body class="pytorch-body">
+
+   
+
+  
+
+  <div class="table-of-contents-link-wrapper">
+    <span>Table of Contents</span>
+    <a href="#" class="toggle-table-of-contents" data-behavior="toggle-table-of-contents"></a>
+  </div>
+
+  <nav data-toggle="wy-nav-shift" class="pytorch-left-menu" id="pytorch-left-menu">
+    <div class="pytorch-side-scroll">
+      <div class="pytorch-menu pytorch-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        <div class="pytorch-left-menu-search">
+          
+
+          
+          
+          
+          
+
+          
+
+
+
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search Docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        
+        
+        
+        
+        
+        <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../00_intro/index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../01_quickstart/index.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../02_algo/index.html">RL Algorithm Taxonomy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../03_system/index.html">System Design</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../04_best_practice/index.html">Best Practice</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">API Doc</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../06_faq/index.html">FAQ</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reinforcement Learning Tutorial</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../10_concepts/index.html">Introduction to RL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../11_dizoo/index.html">Learn From DI-zoo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../12_policies/index.html">RL Algorithms Cheat Sheet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../13_envs/index.html">RL Env Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Developer Specification</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../20_spec/index.html">Specification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../21_code_style/index.html">Code Style Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../22_test/index.html">Unit Test Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../23_visual/index.html">Diagrams and Visualization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../24_cooperation/index.html">Github Cooperation</a></li>
+</ul>
+
+        
+        
+      </div>
+    </div>
+  </nav>
+
+  <div class="pytorch-container">
+    <div class="pytorch-page-level-bar" id="pytorch-page-level-bar">
+      <div class="pytorch-breadcrumbs-wrapper">
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="pytorch-breadcrumbs">
+    
+      <li>
+        <a href="../index.html">
+            Docs
+        </a> &gt;
+      </li>
+
+        
+          <li><a href="index.html">API Doc</a> &gt;</li>
+        
+      <li>ding.policy</li>
+    
+    
+      <li class="pytorch-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/05_api_doc/policy.rst.txt" rel="nofollow"><img src="../_static/images/view-page-source-icon.svg"></a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+</div>
+      </div>
+
+      <div class="pytorch-shortcuts-wrapper" id="pytorch-shortcuts-wrapper">
+        Shortcuts
+      </div>
+    </div>
+
+    <section data-toggle="wy-nav-shift" id="pytorch-content-wrap" class="pytorch-content-wrap">
+      <div class="pytorch-content-left">
+        
+          <div class="rst-content">
+            
+            <div role="main" class="main-content" itemscope="itemscope" itemtype="http://schema.org/Article">
+              <article itemprop="articleBody" id="pytorch-article" class="pytorch-article">
+                
+  <section id="ding-policy">
+<h1>ding.policy<a class="headerlink" href="#ding-policy" title="Permalink to this heading">¶</a></h1>
+<section id="base-policy">
+<h2>Base Policy<a class="headerlink" href="#base-policy" title="Permalink to this heading">¶</a></h2>
+<p>Please refer to <code class="docutils literal notranslate"><span class="pre">ding/policy/base_policy.py</span></code> for more details.</p>
+<section id="policy">
+<h3>Policy<a class="headerlink" href="#policy" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="commandmodepolicy">
+<h3>CommandModePolicy<a class="headerlink" href="#commandmodepolicy" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="create-policy">
+<h3>create_policy<a class="headerlink" href="#create-policy" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="get-policy-cls">
+<h3>get_policy_cls<a class="headerlink" href="#get-policy-cls" title="Permalink to this heading">¶</a></h3>
+</section>
+</section>
+<section id="dqn">
+<h2>DQN<a class="headerlink" href="#dqn" title="Permalink to this heading">¶</a></h2>
+<p>Please refer to <code class="docutils literal notranslate"><span class="pre">ding/policy/dqn.py</span></code> for more details.</p>
+<section id="dqnpolicy">
+<h3>DQNPolicy<a class="headerlink" href="#dqnpolicy" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="dqnstdimpolicy">
+<h3>DQNSTDIMPolicy<a class="headerlink" href="#dqnstdimpolicy" title="Permalink to this heading">¶</a></h3>
+</section>
+</section>
+<section id="ppo">
+<h2>PPO<a class="headerlink" href="#ppo" title="Permalink to this heading">¶</a></h2>
+<p>Please refer to <code class="docutils literal notranslate"><span class="pre">ding/policy/ppo.py</span></code> for more details.</p>
+<section id="ppopolicy">
+<h3>PPOPolicy<a class="headerlink" href="#ppopolicy" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="ppopgpolicy">
+<h3>PPOPGPolicy<a class="headerlink" href="#ppopgpolicy" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="ppooffpolicy">
+<h3>PPOOffPolicy<a class="headerlink" href="#ppooffpolicy" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="ppostdimpolicy">
+<h3>PPOSTDIMPolicy<a class="headerlink" href="#ppostdimpolicy" title="Permalink to this heading">¶</a></h3>
+</section>
+</section>
+<section id="bc">
+<h2>BC<a class="headerlink" href="#bc" title="Permalink to this heading">¶</a></h2>
+<p>Please refer to <code class="docutils literal notranslate"><span class="pre">ding/policy/bc.py</span></code> for more details.</p>
+<section id="behaviourcloningpolicy">
+<h3>BehaviourCloningPolicy<a class="headerlink" href="#behaviourcloningpolicy" title="Permalink to this heading">¶</a></h3>
+</section>
+</section>
+<section id="ddpg">
+<h2>DDPG<a class="headerlink" href="#ddpg" title="Permalink to this heading">¶</a></h2>
+<p>Please refer to <code class="docutils literal notranslate"><span class="pre">ding/policy/ddpg.py</span></code> for more details.</p>
+<section id="ddpgpolicy">
+<h3>DDPGPolicy<a class="headerlink" href="#ddpgpolicy" title="Permalink to this heading">¶</a></h3>
+</section>
+</section>
+<section id="td3">
+<h2>TD3<a class="headerlink" href="#td3" title="Permalink to this heading">¶</a></h2>
+<p>Please refer to <code class="docutils literal notranslate"><span class="pre">ding/policy/td3.py</span></code> for more details.</p>
+<section id="td3policy">
+<h3>TD3Policy<a class="headerlink" href="#td3policy" title="Permalink to this heading">¶</a></h3>
+</section>
+</section>
+<section id="sac">
+<h2>SAC<a class="headerlink" href="#sac" title="Permalink to this heading">¶</a></h2>
+<p>Please refer to <code class="docutils literal notranslate"><span class="pre">ding/policy/sac.py</span></code> for more details.</p>
+<section id="sacpolicy">
+<h3>SACPolicy<a class="headerlink" href="#sacpolicy" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="discretesacpolicy">
+<h3>DiscreteSACPolicy<a class="headerlink" href="#discretesacpolicy" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="sqilsacpolicy">
+<h3>SQILSACPolicy<a class="headerlink" href="#sqilsacpolicy" title="Permalink to this heading">¶</a></h3>
+</section>
+</section>
+<section id="r2d2">
+<h2>R2D2<a class="headerlink" href="#r2d2" title="Permalink to this heading">¶</a></h2>
+<p>Please refer to <code class="docutils literal notranslate"><span class="pre">ding/policy/r2d2.py</span></code> for more details.</p>
+<section id="r2d2policy">
+<h3>R2D2Policy<a class="headerlink" href="#r2d2policy" title="Permalink to this heading">¶</a></h3>
+</section>
+</section>
+<section id="impala">
+<h2>IMPALA<a class="headerlink" href="#impala" title="Permalink to this heading">¶</a></h2>
+<p>Please refer to <code class="docutils literal notranslate"><span class="pre">ding/policy/impala.py</span></code> for more details.</p>
+<section id="impalapolicy">
+<h3>IMPALAPolicy<a class="headerlink" href="#impalapolicy" title="Permalink to this heading">¶</a></h3>
+</section>
+</section>
+<section id="qmix">
+<h2>QMIX<a class="headerlink" href="#qmix" title="Permalink to this heading">¶</a></h2>
+<p>Please refer to <code class="docutils literal notranslate"><span class="pre">ding/policy/qmix.py</span></code> for more details.</p>
+<section id="qmixpolicy">
+<h3>QMIXPolicy<a class="headerlink" href="#qmixpolicy" title="Permalink to this heading">¶</a></h3>
+</section>
+</section>
+<section id="cql">
+<h2>CQL<a class="headerlink" href="#cql" title="Permalink to this heading">¶</a></h2>
+<p>Please refer to <code class="docutils literal notranslate"><span class="pre">ding/policy/cql.py</span></code> for more details.</p>
+<section id="cqlpolicy">
+<h3>CQLPolicy<a class="headerlink" href="#cqlpolicy" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="discretecqlpolicy">
+<h3>DiscreteCQLPolicy<a class="headerlink" href="#discretecqlpolicy" title="Permalink to this heading">¶</a></h3>
+</section>
+</section>
+<section id="decisiontransformer">
+<h2>DecisionTransformer<a class="headerlink" href="#decisiontransformer" title="Permalink to this heading">¶</a></h2>
+<p>Please refer to <code class="docutils literal notranslate"><span class="pre">ding/policy/dt.py</span></code> for more details.</p>
+<section id="dtpolicy">
+<h3>DTPolicy<a class="headerlink" href="#dtpolicy" title="Permalink to this heading">¶</a></h3>
+</section>
+</section>
+<section id="pdqn">
+<h2>PDQN<a class="headerlink" href="#pdqn" title="Permalink to this heading">¶</a></h2>
+<p>Please refer to <code class="docutils literal notranslate"><span class="pre">ding/policy/pdqn.py</span></code> for more details.</p>
+<section id="pdqnpolicy">
+<h3>PDQNPolicy<a class="headerlink" href="#pdqnpolicy" title="Permalink to this heading">¶</a></h3>
+</section>
+</section>
+<section id="mdqn">
+<h2>MDQN<a class="headerlink" href="#mdqn" title="Permalink to this heading">¶</a></h2>
+<p>Please refer to <code class="docutils literal notranslate"><span class="pre">ding/policy/mdqn.py</span></code> for more details.</p>
+<section id="mdqnpolicy">
+<h3>MDQNPolicy<a class="headerlink" href="#mdqnpolicy" title="Permalink to this heading">¶</a></h3>
+</section>
+</section>
+<section id="policy-factory">
+<h2>Policy Factory<a class="headerlink" href="#policy-factory" title="Permalink to this heading">¶</a></h2>
+<p>Please refer to <code class="docutils literal notranslate"><span class="pre">ding/policy/policy_factory.py</span></code> for more details.</p>
+<section id="policyfactory">
+<h3>PolicyFactory<a class="headerlink" href="#policyfactory" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="get-random-policy">
+<h3>get_random_policy<a class="headerlink" href="#get-random-policy" title="Permalink to this heading">¶</a></h3>
+</section>
+</section>
+<section id="common-utilities">
+<h2>Common Utilities<a class="headerlink" href="#common-utilities" title="Permalink to this heading">¶</a></h2>
+<p>Please refer to <code class="docutils literal notranslate"><span class="pre">ding/policy/common_utils.py</span></code> for more details.</p>
+<section id="default-preprocess-learn">
+<h3>default_preprocess_learn<a class="headerlink" href="#default-preprocess-learn" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="single-env-forward-wrapper">
+<h3>single_env_forward_wrapper<a class="headerlink" href="#single-env-forward-wrapper" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="single-env-forward-wrapper-ttorch">
+<h3>single_env_forward_wrapper_ttorch<a class="headerlink" href="#single-env-forward-wrapper-ttorch" title="Permalink to this heading">¶</a></h3>
+</section>
+</section>
+</section>
+
+
+              </article>
+              
+            </div>
+            <footer>
+  
+  <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+    
+    <a href="rl_utils.html" class="btn btn-neutral float-right" title="ding.rl_utils" accesskey="n"
+      rel="next">Next <img src="../_static/images/chevron-right-blue.svg"
+        class="next-page"></a>
+    
+    
+    <a href="model.html" class="btn btn-neutral" title="ding.model" accesskey="p"
+      rel="prev"><img src="../_static/images/chevron-right-blue.svg" class="previous-page"> Previous</a>
+    
+  </div>
+  
+
+  <hr>
+
+  <div role="contentinfo">
+    <p>
+      &copy; Copyright 2021, OpenDILab Contributors.
+
+    </p>
+  </div>
+  
+  <div>
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a
+      href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the
+      Docs</a>.
+  </div>
+   
+
+</footer>
+          </div>
+        </div>
+
+        <div class="pytorch-content-right" id="pytorch-content-right">
+          <div class="pytorch-right-menu" id="pytorch-right-menu">
+            <div class="pytorch-side-scroll" id="pytorch-side-scroll-right">
+              <ul>
+<li><a class="reference internal" href="#">ding.policy</a><ul>
+<li><a class="reference internal" href="#base-policy">Base Policy</a><ul>
+<li><a class="reference internal" href="#policy">Policy</a></li>
+<li><a class="reference internal" href="#commandmodepolicy">CommandModePolicy</a></li>
+<li><a class="reference internal" href="#create-policy">create_policy</a></li>
+<li><a class="reference internal" href="#get-policy-cls">get_policy_cls</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#dqn">DQN</a><ul>
+<li><a class="reference internal" href="#dqnpolicy">DQNPolicy</a></li>
+<li><a class="reference internal" href="#dqnstdimpolicy">DQNSTDIMPolicy</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#ppo">PPO</a><ul>
+<li><a class="reference internal" href="#ppopolicy">PPOPolicy</a></li>
+<li><a class="reference internal" href="#ppopgpolicy">PPOPGPolicy</a></li>
+<li><a class="reference internal" href="#ppooffpolicy">PPOOffPolicy</a></li>
+<li><a class="reference internal" href="#ppostdimpolicy">PPOSTDIMPolicy</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#bc">BC</a><ul>
+<li><a class="reference internal" href="#behaviourcloningpolicy">BehaviourCloningPolicy</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#ddpg">DDPG</a><ul>
+<li><a class="reference internal" href="#ddpgpolicy">DDPGPolicy</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#td3">TD3</a><ul>
+<li><a class="reference internal" href="#td3policy">TD3Policy</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#sac">SAC</a><ul>
+<li><a class="reference internal" href="#sacpolicy">SACPolicy</a></li>
+<li><a class="reference internal" href="#discretesacpolicy">DiscreteSACPolicy</a></li>
+<li><a class="reference internal" href="#sqilsacpolicy">SQILSACPolicy</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#r2d2">R2D2</a><ul>
+<li><a class="reference internal" href="#r2d2policy">R2D2Policy</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#impala">IMPALA</a><ul>
+<li><a class="reference internal" href="#impalapolicy">IMPALAPolicy</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#qmix">QMIX</a><ul>
+<li><a class="reference internal" href="#qmixpolicy">QMIXPolicy</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#cql">CQL</a><ul>
+<li><a class="reference internal" href="#cqlpolicy">CQLPolicy</a></li>
+<li><a class="reference internal" href="#discretecqlpolicy">DiscreteCQLPolicy</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#decisiontransformer">DecisionTransformer</a><ul>
+<li><a class="reference internal" href="#dtpolicy">DTPolicy</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#pdqn">PDQN</a><ul>
+<li><a class="reference internal" href="#pdqnpolicy">PDQNPolicy</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#mdqn">MDQN</a><ul>
+<li><a class="reference internal" href="#mdqnpolicy">MDQNPolicy</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#policy-factory">Policy Factory</a><ul>
+<li><a class="reference internal" href="#policyfactory">PolicyFactory</a></li>
+<li><a class="reference internal" href="#get-random-policy">get_random_policy</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#common-utilities">Common Utilities</a><ul>
+<li><a class="reference internal" href="#default-preprocess-learn">default_preprocess_learn</a></li>
+<li><a class="reference internal" href="#single-env-forward-wrapper">single_env_forward_wrapper</a></li>
+<li><a class="reference internal" href="#single-env-forward-wrapper-ttorch">single_env_forward_wrapper_ttorch</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            </div>
+          </div>
+        </div>
+    </section>
+  </div>
+
+  
+
+
+  
+
+  
+  <script type="text/javascript" id="documentation_options" data-url_root="../"
+    src="../_static/documentation_options.js"></script>
+  <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+  <script src="../_static/doctools.js"></script>
+  <script src="../_static/sphinx_highlight.js"></script>
+  
+
+  
+
+  <script type="text/javascript" src="../_static/js/vendor/popper.min.js"></script>
+  <script type="text/javascript" src="../_static/js/vendor/bootstrap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/list.js/1.5.0/list.min.js"></script>
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+    jQuery(function () {
+      SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+  <!-- Begin Footer -->
+
+  <div class="container-fluid docs-tutorials-resources" id="docs-tutorials-resources">
+  </div>
+
+  <!-- End Footer -->
+
+  <!-- Begin Mobile Menu -->
+
+  <div class="mobile-main-menu">
+    <div class="container-fluid">
+      <div class="container">
+        <div class="mobile-main-menu-header-container">
+          <a class="header-logo" href="https://di-engine-docs.readthedocs.io/en/latest/" aria-label="OpenMMLab"></a>
+          <a class="main-menu-close-button" href="#" data-behavior="close-mobile-menu"></a>
+        </div>
+      </div>
+    </div>
+
+    <div class="mobile-main-menu-links-container">
+      <div class="main-menu">
+        <ul>
+          <li>
+            <a href="https://github.com/opendilab/DI-engine" target="_blank">GitHub</a>
+          </li>
+      </div>
+    </div>
+  </div>
+
+  <!-- End Mobile Menu -->
+
+  <script type="text/javascript" src="../_static/js/vendor/anchor.min.js"></script>
+
+  <script type="text/javascript">
+    $(document).ready(function () {
+      mobileMenu.bind();
+      mobileTOC.bind();
+      pytorchAnchors.bind();
+      sideMenus.bind();
+      scrollToAnchor.bind();
+      highlightNavigation.bind();
+      mainMenuDropdown.bind();
+      filterTags.bind();
+
+      // Add class to links that have code blocks, since we cannot create links in code blocks
+      $("article.pytorch-article a span.pre").each(function (e) {
+        $(this).closest("a").addClass("has-code");
+      });
+    })
+  </script>
+</body>
+
+</html>
